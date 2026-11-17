@@ -1,0 +1,11 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "battery_optimization"
+version = "0.1.0"
+dependencies = ["numpy", "pyyaml", "pulp", "highspy"]
+
+[tool.setuptools.packages.find]
+where = ["src/opti_market"]

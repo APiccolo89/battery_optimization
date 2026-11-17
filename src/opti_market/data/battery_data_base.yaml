@@ -1,0 +1,27 @@
+#---
+#max_discharge_rate: (MW) maximum power that battery can export into a given market
+#max_charge_rate: (MW) maximum power that battery can import from a market 
+#max_storgage_vol: (MWh) maximum volume that can store 
+#charge_eff: (n.d.): efficiency of charging (i.e., loss of bought energy)
+#dicharge_eff: (n.d.): efficiency of discharging (i.e., loss of energy sold)
+#max_cycle: (cycles): maximum amount of cycle of charging/discharging
+#max_life: (yr)
+#degradation: (%/cycle): degradation of the battery as a function of the cycle 
+#Capex: (pound): cost of buying and installing battery
+#fix_cost_yr (pound): fixed year costs 
+#currency: '' currency of the battery specification
+#----
+
+bt001:
+  model_name: bt001
+  max_discharge_rate: 2.0
+  max_charge_rate: 2.0 
+  max_storage_vol: 4.0 
+  charge_eff: 0.05
+  discharge_eff: 0.05
+  max_cycle: 5000
+  max_life: 10
+  degradation: 0.001
+  capex: 500000
+  fix_cost_yr: 5000
+  currency: 'Pounds'

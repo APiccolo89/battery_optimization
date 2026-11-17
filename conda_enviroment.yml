@@ -1,0 +1,16 @@
+name: battery_optimization
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - numpy
+  - pandas
+  - pyyaml
+  - matplotlib
+  - pytest
+  - pip
+  - openpyxl
+  - pip:
+      - pulp
+      - highspy
+      - -e .
