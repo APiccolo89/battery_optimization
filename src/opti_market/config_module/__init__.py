@@ -6,4 +6,4 @@ __all__ = ["BATTERY"
            ,"BATTERY_SPEC"
            ,"configure_market"
            ,"configuration_read"
-           ,Markets] # type: ignore
+           ,"Markets"] # type: ignore

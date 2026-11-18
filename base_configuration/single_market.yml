@@ -5,7 +5,7 @@ simulation:
   battery:
     model_name: bt001 # bt001 
     degradation_model: linear # // {options: linear, compound}: 
-    initial_cycle: 0 # In the case the battery has been already deployed before the interval  of the simulation. 
+    initial_cycles: 0 # In the case the battery has been already deployed before the interval  of the simulation. 
     initial_age: 0  # In the case of the battery has been already deployed before the interval of the simulation. 
     initial_charge: 0.5 # Default charge at the beginning of the life time of the battery
 

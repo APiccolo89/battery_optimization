@@ -7,23 +7,25 @@ Definition of options for the input configuration file.
 
 from importlib.resources import files
 from pathlib import Path
+from typing import Literal, Any
 
 import yaml
 
+OptionKind = Literal["man", "opt"]
+OptionValue = str | Any | None
 # --- 
 # The lowest level of the dictionary always
-_BATTERY_INPUT_ = {'model_name': ('man',None),
+_BATTERY_INPUT_ : dict[str,tuple[OptionKind, OptionValue]] = {'model_name': ('man',None),
                    'degradation_model':('opt','linear'),
-                   'initial_cycle':('opt',0),
+                   'initial_cycles':('opt',0),
                    'initial_age':('opt',0),
-                   'name_field': ('battery')}
+                   'initial_charge':('opt',0.5),
+                   'name_field': ('opt','battery')}
 
-_MARKET_INPUT_ = {'prices_file' : ('man',None),
+_MARKET_INPUT_ : dict[str,tuple[OptionKind, OptionValue]]= {'prices_file' : ('man',None),
                   'path_to_file': ('opt',None),
                   'packaged_data': ('opt',True),
-                  'name_field':('market')}
-
-
+                  'name_field':('opt','market')}
 # --- 
 # --- 
 def read_battery(inp_dict:dict)->dict:
@@ -67,7 +69,7 @@ def check_input(inp_dict:dict,par:dict)-> dict:
             if par[i][0] == 'opt':
                 new_dict[i] = par[i][1]
             if par[i][0] == 'man':
-                raise ValueError(f"{i} is a mandatory, check {par['name_field']}")
+                raise ValueError(f"{i} is a mandatory, check {par['name_field'][1]}")
         elif i in inp_dict and i != 'name_field':
             new_dict[i] = inp_dict[i]
     
@@ -150,9 +152,4 @@ def read_configuration(config_file:str)->dict:
     return configurations_sim 
 
 
-    
 
-
-if __name__ == '__main__':
-    
-    pass 
