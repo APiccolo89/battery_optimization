@@ -1,0 +1,18 @@
+# Simulation configuration. Markets not listed here are not used.
+simulation:
+  window_days: 1
+
+  battery:
+    model_name: bt001 # bt001 
+    degradation_model: linear # // {options: linear, compound}: 
+    initial_cycle: 0 # In the case the battery has been already deployed before the interval  of the simulation. 
+    initial_age: 0  # In the case of the battery has been already deployed before the interval of the simulation. 
+    initial_charge: 0.5 # Default charge at the beginning of the life time of the battery
+
+  # The maximum market per battery is 6 {arbitrary number}. The omitted market are not considered. Potential extension
+  # path to metadata of the market. 
+  markets:
+    market1:
+      prices_file: market1.csv # Name of the file
+      path_to_file: null # path to the file 
+      packaged_data: True # Flag to indicate if the market csv is in the package {fixed location in study_case}

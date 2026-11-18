@@ -38,21 +38,21 @@ class BATTERY_SPEC:
     """
     
     model_name:str
-    max_discharge_rate: np.float32
-    max_charge_rate: np.float32 
-    max_storage_vol: np.float32
-    charge_eff: np.float32 
-    discharge_eff: np.float32
-    max_cycle: np.float32
-    max_life: np.int32
-    degradation: np.float32
-    capex: np.float32
-    fix_cost_yr: np.float32 
+    max_discharge_rate: float
+    max_charge_rate: float 
+    max_storage_vol: float
+    charge_eff: float 
+    discharge_eff: float
+    max_cycle: float
+    max_life: int
+    degradation: float
+    capex: float
+    fix_cost_yr: float 
     currency:str 
 # ---
 @dataclass
 class BATTERY:
-    mname: InitVar[str]
+    model_name: InitVar[str]
     battery_spec:BATTERY_SPEC = field(init=False)
     # Initial state of the battery
     # --- 
@@ -63,20 +63,20 @@ class BATTERY:
     # configurations of the network that can be informed by the software for adjusting on the go 
     # the charge/discharge. Given this ignorance, I let open this possibility. 
     # --- 
-    initial_charge: np.float32 = 0.5
-    initial_cycles: np.float32 = 0
-    initial_age: np.int32 = 0 
+    initial_charge: float = 0.5
+    initial_cycles: float = 0
+    initial_age: int = 0 
     # Current state variable
-    effective_max_storage_vol : np.float32 = 0.0
-    total_number_cycle : np.float32 = 0.0 
-    cumulative_power_discharged : np.float32 = 0.0
-    model : DegradationModel = 'linear'
+    effective_max_storage_vol : float = 0.0
+    total_number_cycle : float = 0.0 
+    cumulative_power_discharged : float = 0.0
+    degradation_model : DegradationModel = 'linear'
     # TO DECIDE - as soon as I set up the optimisation solver 
     # current_charge
     # define the concept of cycles
     # --- 
     def __post_init__(self
-                      ,mname:str)->None:
+                      ,model_name:str)->None:
         """Update the battery_spec
         Read the yml file containing the battery specification 
         Fill the battery_spec sub-class 
@@ -85,7 +85,7 @@ class BATTERY:
         Args:
             mname (str): _description_
         """
-        self.read_yml_battery(mname)
+        self.read_yml_battery(model_name)
         # Update the initial state. 
         self.total_number_cycle = self.initial_cycles
         self._update_effective_max_storage_vol()
@@ -129,7 +129,7 @@ class BATTERY:
         
         return getattr(self.battery_spec,spec)
     # --- 
-    def _update_total_discharge(self,dE:np.float32)->None:
+    def _update_total_discharge(self,dE:float)->None:
         """Update the total discharge 
         dE: total discharge for a given amount of time (i.e., sold energy to the market)
         Update the energy discharge
@@ -141,7 +141,7 @@ class BATTERY:
         self.cumulative_power_discharged = self.cumulative_power_discharged \
             + np.abs(dE) 
     # --- 
-    def analytical_total_discharge(self)->np.float32:
+    def analytical_total_discharge(self)->float:
         """Compute the analytical total discharge. 
         The analytical expression for the total energy can be derived
         by a simple integration of the total number of cycle.
@@ -149,9 +149,9 @@ class BATTERY:
         E0 = self.get_spec_battery('max_storage_vol')
         degradation = self.get_spec_battery('degradation')/100
         n = self.total_number_cycle 
-        if self.model == 'compound':
+        if self.degradation_model == 'compound':
             E_anal = (self.effective_max_storage_vol - E0) / np.log(1 - degradation)
-        elif self.model == 'linear':
+        elif self.degradation_model == 'linear':
             E_anal = E0 * (n - degradation * n**2 / 2)
         else: 
             raise ValueError('Wrong degradation model')
@@ -164,27 +164,27 @@ class BATTERY:
         TO DO: pyfile of global configuration to modify, or introducing
         directly the option in the class battery
         """
-        if self.model == 'compound':
+        if self.degradation_model == 'compound':
             self.effective_max_storage_vol = self.get_spec_battery('max_storage_vol') * \
                 (1-self.get_spec_battery('degradation')/100)**self.total_number_cycle
-        if self.model == 'linear':
+        if self.degradation_model == 'linear':
             self.effective_max_storage_vol = self.get_spec_battery('max_storage_vol') * \
                 (1-self.get_spec_battery('degradation')/100 *self.total_number_cycle)
     # --- 
-    def _update_cycle(self,dE:np.float32)->None:
+    def _update_cycle(self,dE:float)->None:
         """Update the number of cycle using the current discharge 
         and using the previous effective_max_volume. 
 
         Args:
-            dE (np.float32): currenty energy
+            dE (float): currenty energy
         """
 
         self.total_number_cycle = self.total_number_cycle \
             + np.abs(dE)/self.effective_max_storage_vol
     # --- 
-    def update_state_battery(self,dE:np.float32)->None:
+    def update_state_battery(self,dE:float)->None:
         if dE > 0: 
-            raise ValueError('The total discharge must be always negative!')
+            raise ValueError('The total discharge must be always negative')
         else: 
             self._update_cycle(dE)
             self._update_effective_max_storage_vol()
