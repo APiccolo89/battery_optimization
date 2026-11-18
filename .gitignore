@@ -1,7 +1,3 @@
-*.pyc
-src/opti_market/config_module/__pycache__/__init__.cpython-312.pyc
-src/opti_market/config_module/__pycache__/__init__.cpython-312.pyc
-src/opti_market/config_module/__pycache__/configure_battery.cpython-312.pyc
-tests/__pycache__/test_config_battery.cpython-312-pytest-9.2.0.pyc
-src/opti_market/config_module/__pycache__/__init__.cpython-312.pyc
-tests/__pycache__/test_config_battery.cpython-312-pytest-9.2.0.pyc
+__pycache__/
+*.py[cod]
+*.egg-info
