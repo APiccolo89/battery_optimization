@@ -30,10 +30,3 @@ def read_market(name:str, path:str)->pd.DataFrame:
     
     return market
 # --- 
-
-
-
-    
-
-if __name__ == '__main__':
-    test_read_market()
