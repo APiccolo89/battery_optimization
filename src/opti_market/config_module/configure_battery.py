@@ -49,7 +49,7 @@ class BATTERY_SPEC:
     capex: np.float32
     fix_cost_yr: np.float32 
     currency:str 
-
+# ---
 @dataclass
 class BATTERY:
     mname: InitVar[str]
