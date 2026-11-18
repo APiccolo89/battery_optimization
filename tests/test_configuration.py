@@ -1,8 +1,11 @@
+from importlib.resources import files
+from pathlib import Path
 
+import numpy as np
+import pytest
+import pandas as pd 
 
-
-
-
+from opti_market.config_module import read_configuration
 
 
 def test_configuration():

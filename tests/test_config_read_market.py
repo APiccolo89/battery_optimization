@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 import pandas as pd 
 
-from opti_market.config_module import read_market
+from opti_market.config_module import read_market, Markets
 from opti_market.config_module import read_configuration
 
 # --- 
