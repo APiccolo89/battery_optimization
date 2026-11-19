@@ -1,4 +1,4 @@
-from importlib.resources import files
+import importlib.resources
 from pathlib import Path
 
 import numpy as np
@@ -19,7 +19,7 @@ def test_configure_battery():
     # Read the battery and check wheter or not the name, and the other data are there.
 
     pathtoconfig = str(
-        Path(str(files("opti_market"))).resolve().parents[1]
+        Path(str(importlib.resources.files("opti_market"))).resolve().parents[1]
         / "base_configuration"
         / "double_market.yml"
     )
