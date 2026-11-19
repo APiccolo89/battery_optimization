@@ -17,8 +17,8 @@ import pandas as pd
  
 # sheet name -> (output file name, time step)
 SHEETS = {
-    "Half-hourly data": ("market1_halfhourly.csv", "30min"),
-    "Hourly data": ("market2_hourly.csv", "1h"),
+    "Half-hourly data": ("market1.csv", "30min"),
+    "Hourly data": ("market2.csv", "1h"),
 }
  
  
