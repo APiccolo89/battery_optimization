@@ -1,18 +1,16 @@
 from importlib.resources import files
 from pathlib import Path
 
-import numpy as np
-import pytest
-import pandas as pd 
+import pandas as pd
 
-from opti_market.config_module import read_market, Markets
-from opti_market.config_module import read_configuration
+from opti_market.config_module import Markets, read_configuration, read_market
+
 
 # --- 
 def test_market_class():
     from importlib.resources import files
     
-    pathtoconfig = str(Path(files("opti_market")).resolve().parents[1] \
+    pathtoconfig = str(Path(str(files("opti_market"))).resolve().parents[1] \
                      / 'base_configuration' / 'double_market.yml')
     
     config_sim = read_configuration(pathtoconfig)
@@ -24,7 +22,7 @@ def test_market_class():
     
 # --- 
 def test_read_market():
-    path = Path(files("opti_market")).resolve().parents[1] / 'study_case'
+    path = Path(str(files("opti_market"))).resolve().parents[1] / 'study_case'
     
     market1 = read_market('market1.csv',str(path))
     

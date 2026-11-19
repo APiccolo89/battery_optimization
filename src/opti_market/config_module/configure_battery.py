@@ -10,9 +10,9 @@ BATTERY: is a dataclass that contains the specification of the battery (i.e., BA
 """
 
 
-from typing import Literal
 from dataclasses import InitVar, dataclass, field
 from pathlib import Path
+from typing import Literal
 
 import numpy as np
 import yaml
@@ -80,7 +80,6 @@ class BATTERY:
         """Update the battery_spec
         Read the yml file containing the battery specification 
         Fill the battery_spec sub-class 
-        If
 
         Args:
             mname (str): _description_
