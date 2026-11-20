@@ -8,7 +8,6 @@ import opti_market.config_module
 
 # --- 
 def test_market_class():
-    from importlib.resources import files
     
     pathtoconfig = str(Path(str(files("opti_market"))).resolve().parents[1] \
                      / 'base_configuration' / 'double_market.yml')
@@ -28,3 +27,7 @@ def test_read_market():
     
     assert isinstance(market1,pd.DataFrame)
 # --- 
+
+if __name__ == '__main__':
+    
+    test_market_class()

@@ -1,7 +1,13 @@
 # Simulation configuration. Markets not listed here are not used.
 simulation:
-  window_days: 1
+  optimization:
+    window_days: 1 # Date in [us]
+    start_date: 2018/01/01
+    end_date: 2018/01/08
+    max_cycles: 1.37 # Maximum cycle of the battery per day
+    charge_min: 0.0 # The minimal energy of the battery that must be retained
 
+ 
   battery:
     model_name: bt001 # bt001 
     degradation_model: linear # // {options: linear, compound}: 

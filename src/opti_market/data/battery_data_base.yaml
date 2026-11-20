@@ -2,8 +2,8 @@
 #max_discharge_rate: (MW) maximum power that battery can export into a given market
 #max_charge_rate: (MW) maximum power that battery can import from a market 
 #max_storgage_vol: (MWh) maximum volume that can store 
-#charge_eff: (n.d.): efficiency of charging (i.e., loss of bought energy)
-#dicharge_eff: (n.d.): efficiency of discharging (i.e., loss of energy sold)
+#charge_eff: (n.d.): efficiency of charging (i.e., loss of bought energy) [xx corrected 1-original_value]
+#dicharge_eff: (n.d.): efficiency of discharging (i.e., loss of energy sold)[xx corrected 1-original_value]
 #max_cycle: (cycles): maximum amount of cycle of charging/discharging
 #max_life: (yr)
 #degradation: (%/cycle): degradation of the battery as a function of the cycle 
@@ -17,8 +17,8 @@ bt001:
   max_discharge_rate: 2.0
   max_charge_rate: 2.0 
   max_storage_vol: 4.0 
-  charge_eff: 0.05
-  discharge_eff: 0.05
+  charge_eff: 0.95
+  discharge_eff: 0.95
   max_cycle: 5000
   max_life: 10
   degradation: 0.001
