@@ -13,16 +13,12 @@ from opti_market.config_module import BATTERY, Markets, Opti_Market_Options
 _MIN_DAY_ = 1440
 _MIN_HR_ = 60
 VarDict = dict[int, pulp.LpVariable]  # type alias: shorter annotations
-
-
 # Useful class for handling multimarket
 class MarketProblem(TypedDict):
     charge: VarDict
     discharge: VarDict
     res: int
     prices: NDArray[np.float64]
-
-
 # ---
 # ---
 def select_range_prices(
@@ -47,8 +43,6 @@ def select_range_prices(
     prices = tar_markt.loc[price_index, "price_gbp_per_mwh"].to_numpy(dtype=np.float64)
 
     return prices
-
-
 # ---
 def add_market(
     prob: pulp.LpProblem, prices: NDArray[np.float64], res: int, market_number: int
@@ -64,8 +58,6 @@ def add_market(
         res=res,
         prices=prices,
     )
-
-
 # ---
 def battery_confg(
     prob: pulp.LpProblem, bat: BATTERY, time_vec_len: int
@@ -87,8 +79,6 @@ def battery_confg(
     }
 
     return config_bat
-
-
 # ---
 def configure_problem(
     name_problem: str,
@@ -167,8 +157,6 @@ def configure_problem(
         prob += discharge <= max_dch * (1 - bat_prb["charge_binary"][i])
 
     return prob, mkrt_prb, bat_prb
-
-
 # ---
 def solve_problem(
     opti_opt: Opti_Market_Options, bat: BATTERY, markt: Markets
@@ -180,7 +168,8 @@ def solve_problem(
     start_energy = 0
 
     total_profit = 0.0
-
+    total_energy_left = 0.0 
+    
     for i in range(n_opt_max):
         prob, mkrt_prb, bat_prb = configure_problem(
             name_problem=f"Dispatch_Battery_n{i}",
@@ -203,48 +192,16 @@ def solve_problem(
         if final_energy is None:
             raise RuntimeError("Solver did not return a final battery energy value")
         start_energy = final_energy  # MWh at the end of the window
+        total_energy_left = total_energy_left + final_energy
         bat.update_state_battery(dE=final_energy)
-        total_profit = total_profit + pulp.value(prob.objective)
-
+        total_profit = total_profit + float(pulp.value(prob.objective))
+        
+    
     print(
-        f" TOTAL{total_profit:.2f} profit for {opti_opt.start_date} to {opti_opt.end_date}"
+        f"    TOTAL. {total_profit:.2f} profit for {opti_opt.start_date} to {opti_opt.end_date}",
     )
 
     results_pd = pd.DataFrame([])
 
     return results_pd
-
-
-# Produce the final output
-def produce_output():
-
-    pass
-
-
 # ---
-def test_integration_test():
-
-    from importlib.resources import files
-    from pathlib import Path
-
-    import opti_market.config_module as cf
-
-    pathtoconfig = str(
-        Path(str(files("opti_market"))).resolve().parents[1]
-        / "base_configuration"
-        / "single_market.yml"
-    )
-
-    config_sim = cf.read_configuration(pathtoconfig)
-
-    bat = BATTERY(**config_sim["battery"])
-    markt = Markets(config_sim["markets"])
-    opti_opt = Opti_Market_Options.read_optimisation_options(config_sim["sim_options"])
-
-    output = solve_problem(opti_opt=opti_opt, markt=markt, bat=bat)
-
-    assert isinstance(output, pd.DataFrame)
-
-
-if __name__ == "__main__":
-    test_integration_test()

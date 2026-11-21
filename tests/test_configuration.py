@@ -5,6 +5,9 @@ from opti_market.config_module import read_configuration
 
 
 def test_configuration():
+    """Read the configuration files 
+    Do basic checks. 
+    """
 
     pathtoconfig = str(
         Path(str(files("opti_market"))).resolve().parents[1]

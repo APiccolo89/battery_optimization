@@ -1,0 +1,26 @@
+simulation:
+  optimization:
+    window_days: 
+    start_date:
+    end_date: 
+    max_cycles: 
+    charge_min:
+  battery:
+    model_name: 
+    degradation_model: 
+    initial_cycles: 
+    initial_age:
+    initial_charge:
+  markets:
+    market1:
+      prices_file: 
+      path_to_file: 
+      packaged_data: 
+    market2:
+      prices_file: 
+      path_to_file: 
+      packaged_data:
+  outputs: 
+    path_to_save: 
+    basic_plot: 
+    in_the_packg: 

@@ -8,6 +8,8 @@ grid is rebuilt from the first timestamp and the number of rows.
  
 Usage:
     python convert_prices.py path/to/prices.xlsx data/
+    
+[Claude]: This script has been done using claude. 
 """
  
 import sys
