@@ -2,3 +2,4 @@ __pycache__/
 *.py[cod]
 *.egg-info
 tests/__pycache__/test_config_battery.cpython-312-pytest-9.2.0.pyc
+results/*

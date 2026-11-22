@@ -11,6 +11,11 @@ from typing import Any, Literal
 
 import yaml
 
+from opti_market.config_module.configure_battery import BATTERY
+from opti_market.config_module.configure_market import Markets
+from opti_market.config_module.configure_output import Output
+from opti_market.config_module.configure_simulation import Opti_Market_Options
+
 # --> Global variables : to move in utils after the first draft of the code is done
 #     1. To avoid duplicate logic, and having a centralised global_par.py in utils.py
 # ---
@@ -51,6 +56,12 @@ _SIMULATION_INPUT_: dict[str, tuple[OptionKind, OptionValue]] = {
     ),  # I wanted to put a minimal residual charge, but for preserving the battery, also max_cycle can work.
     "window_days": ("opt", 1),
 }
+_OUTPUT_INPUT_: dict[str, tuple[OptionKind, OptionValue]] = {
+    "path_to_save": ("opt", None),
+    "basic_plot": ("opt", False),
+    "default_location": ("opt", True),
+    "clean_option": ("opt", True),
+}
 
 
 # ---
@@ -60,6 +71,25 @@ def read_simulation_config(inp_dict: dict[str, Any]) -> dict[str, Any]:
     sim_config = check_input(inp_dict=inp_dict, par=_SIMULATION_INPUT_)
 
     return sim_config
+
+
+# ---
+def read_simulation_output(inp_dict: dict[str, Any]) -> dict[str, Any]:
+
+    output_configuration = check_input(inp_dict=inp_dict, par=_OUTPUT_INPUT_)
+    # Safe Guard.
+    if output_configuration["path_to_save"] == "":
+        output_configuration["path_to_save"] = None
+
+    if (
+        output_configuration["path_to_save"] is not None
+        and (output_configuration["default_location"])
+    ):
+        raise ValueError(
+            "The default location cannot be True, if a path_to_save is specified"
+        )
+
+    return output_configuration
 
 
 # ---
@@ -190,6 +220,8 @@ def post_process_config_file(
     config_fin["sim_options"] = read_simulation_config(
         pre_config["simulation"]["optimization"]
     )
+    config_fin["output"] = read_simulation_output(pre_config["simulation"]["output"])
+    config_fin["name"] = pre_config["simulation"]["name"]
 
 
 # ---
@@ -219,3 +251,37 @@ def read_configuration(config_file: str) -> dict[str, dict[str, Any]]:
         )
 
     return configurations_sim
+
+
+# ---
+def read_configurations_files(
+    config_file: str,
+) -> tuple[BATTERY, Markets, Opti_Market_Options, Output]:
+    """Configure the simulation using the configuration file
+
+    Args:
+        config_file (str): path to the configuration file
+
+    Returns:
+        tuple[BATTERY, Markets, Opti_Market_Options, Output]: classes that handles the simulation behaviour
+    """
+
+    configuration_sim = read_configuration(config_file=config_file)
+
+    bat = BATTERY(**configuration_sim["battery"])
+    # Market
+    markt = Markets(configuration_sim["markets"])
+    # Solution options: {To Do: seeing the other options}
+    opti_opt = Opti_Market_Options.read_optimisation_options(
+        configuration_sim["sim_options"]
+    )
+    output = Output.read_output_configuration(
+        dict_config=configuration_sim["output"],
+        name_simulation=str(configuration_sim["name"]),
+    )
+
+    return bat, markt, opti_opt, output
+
+
+# ---
+# ---

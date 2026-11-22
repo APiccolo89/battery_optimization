@@ -1,5 +1,6 @@
 # Simulation configuration. Markets not listed here are not used.
 simulation:
+  name: Single_Market_a
   optimization:
     window_days: 1 # Date in [us]
     start_date: 2018/01/01
@@ -22,3 +23,9 @@ simulation:
       prices_file: market1.csv # Name of the file
       path_to_file: null # path to the file 
       packaged_data: True # Flag to indicate if the market csv is in the package {fixed location in study_case}
+  
+  output: 
+    path_to_save: null
+    basic_plot: True
+    default_location: True
+    clean_option: True
