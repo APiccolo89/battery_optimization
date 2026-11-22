@@ -1,4 +1,3 @@
-
 from dataclasses import dataclass
 from typing import Any
 
@@ -32,6 +31,8 @@ class Opti_Market_Options:
             max_cycles=max_cycles,
             charge_min=charge_min,
         )
+
+
 # ---
 def _parse_dates(
     sd: str, ed: str | None, window: pd.Timedelta
@@ -73,5 +74,7 @@ def _parse_dates(
         )
 
     return parsed_sd, parsed_ed
+
+
 # ---
 # ---

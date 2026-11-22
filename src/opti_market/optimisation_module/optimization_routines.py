@@ -6,7 +6,7 @@ import pulp
 from numpy.typing import NDArray
 
 from opti_market.config_module import BATTERY, Markets, Opti_Market_Options, Output
-from opti_market.output_module import output_results_opti,print_summary,save_summary
+from opti_market.output_module import output_results_opti, print_summary, save_summary
 
 # ---
 # ---
@@ -14,6 +14,8 @@ from opti_market.output_module import output_results_opti,print_summary,save_sum
 _MIN_DAY_ = 1440
 _MIN_HR_ = 60
 VarDict = dict[int, pulp.LpVariable]  # type alias: shorter annotations
+
+
 # Useful class for handling multimarket
 class MarketProblem(TypedDict):
     charge: VarDict
@@ -21,8 +23,9 @@ class MarketProblem(TypedDict):
     res: int
     prices: NDArray[np.float64]
 
+
 # ---
-# --- 
+# ---
 def select_range_prices(
     tar_markt: pd.DataFrame, date: pd.Timestamp, window: pd.Timedelta
 ) -> NDArray[np.float64]:
@@ -45,6 +48,8 @@ def select_range_prices(
     prices = tar_markt.loc[price_index, "price_gbp_per_mwh"].to_numpy(dtype=np.float64)
 
     return prices
+
+
 # ---
 def add_market(
     prob: pulp.LpProblem, prices: NDArray[np.float64], res: int, market_number: int
@@ -60,6 +65,8 @@ def add_market(
         res=res,
         prices=prices,
     )
+
+
 # ---
 def battery_confg(
     prob: pulp.LpProblem, bat: BATTERY, time_vec_len: int
@@ -81,6 +88,8 @@ def battery_confg(
     }
 
     return config_bat
+
+
 # ---
 def configure_problem(
     name_problem: str,
@@ -159,12 +168,11 @@ def configure_problem(
         prob += discharge <= max_dch * (1 - bat_prb["charge_binary"][i])
 
     return prob, mkrt_prb, bat_prb
-# --- 
+
+
+# ---
 def solve_problem(
-    opti_opt: Opti_Market_Options
-    , bat: BATTERY
-    , markt: Markets
-    ,output: Output
+    opti_opt: Opti_Market_Options, bat: BATTERY, markt: Markets, output: Output
 ) -> None:
 
     interval = opti_opt.end_date - opti_opt.start_date
@@ -173,22 +181,21 @@ def solve_problem(
     start_energy = 0
 
     total_profit = 0.0
-    total_energy_left = 0.0 
-    
+
     market_names = [f"market_n{i}" for i in range(1, markt.n_market + 1)]
     summary: dict[str, Any] = {
-    "start_date": opti_opt.start_date,
-    "end_date":opti_opt.end_date,
-    "optimization_window": opti_opt.window_day,
-    "battery_model":bat.get_spec_battery('model_name'),
-    "total_revenue": 0.0,
-    "final_energy_mwh": 0.0,
-    "market_revenues": {name: 0.0 for name in market_names},
-    "battery_cyles": 0.0,
-    "total_energy_left_mwh": 0.0,
-    "effective_max_pow_mw": 0.0,
+        "start_date": opti_opt.start_date,
+        "end_date": opti_opt.end_date,
+        "optimization_window": opti_opt.window_day,
+        "battery_model": bat.get_spec_battery("model_name"),
+        "total_revenue": 0.0,
+        "final_energy_mwh": 0.0,
+        "market_revenues": {name: 0.0 for name in market_names},
+        "battery_cyles": 0.0,
+        "total_energy_left_mwh": 0.0,
+        "effective_max_pow_mw": 0.0,
     }
-    
+
     for i in range(n_opt_max):
         prob, mkrt_prb, bat_prb = configure_problem(
             name_problem=f"Dispatch_Battery_n{i}",
@@ -202,32 +209,38 @@ def solve_problem(
         stats = prob.solve(pulp.HiGHS(msg=False))
         status = stats.status.name
         assert status == "Optimal", status
-        # --- Save the raw data set and the windows average  
-        output_results_opti(output=output,
-                      bat_cfg=bat_prb,
-                      markt=mkrt_prb,
-                      prob=prob,
-                      time_information=(start
-                                        ,markt.dt
-                                        ,opti_opt.window_day),
-                      summary=summary)
+        # --- Save the raw data set and the windows average
+        output_results_opti(
+            output=output,
+            bat_cfg=bat_prb,
+            markt=mkrt_prb,
+            prob=prob,
+            time_information=(start, markt.dt, opti_opt.window_day),
+            summary=summary,
+        )
         # -- Update the data for starting an other optimization window
-        energy = np.array([bat_prb["energy_bat"][t].value() for t in range(len(bat_prb["energy_bat"]))])        
-        final_energy = energy[-1]                       # state at the end -> next window
+        energy = np.array(
+            [
+                bat_prb["energy_bat"][t].value()
+                for t in range(len(bat_prb["energy_bat"]))
+            ]
+        )
+        final_energy = energy[-1]  # state at the end -> next window
         steps = np.diff(energy)
-        discharged = -steps[steps < 0].sum()            # flow during the window, positive
-        bat.update_state_battery(dE=-discharged)        # your method expects it negative
+        discharged = -steps[steps < 0].sum()  # flow during the window, positive
+        bat.update_state_battery(dE=-discharged)  # your method expects it negative
         start_energy = min(max(final_energy, 0.0), bat.effective_max_storage_vol)
         total_profit = total_profit + float(pulp.value(prob.objective))
         start = start + opti_opt.window_day
     print(
         f"    TOTAL. {total_profit:.2f} profit for {opti_opt.start_date} to {opti_opt.end_date}",
     )
-    summary['total_revenue'] = total_profit
-    summary['effective_max_pow_mw'] = bat.effective_max_storage_vol
-    summary['battery_cyles'] = bat.total_number_cycle
-    summary['final_energy_mwh'] = start_energy
+    summary["total_revenue"] = total_profit
+    summary["effective_max_pow_mw"] = bat.effective_max_storage_vol
+    summary["battery_cyles"] = bat.total_number_cycle
+    summary["final_energy_mwh"] = start_energy
     print_summary(summary)
-    save_summary(summary=summary,output=output)
+    save_summary(summary=summary, output=output)
+
 
 # ---
