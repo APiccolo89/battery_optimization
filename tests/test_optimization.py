@@ -15,6 +15,9 @@ from opti_market.config_module import (
 )
 from opti_market.optimisation_module import solve_problem
 
+
+# --- 
+# --- 
 @pytest.fixture(scope="session", autouse=True)
 def cleanup_output():
     yield
@@ -23,7 +26,7 @@ def cleanup_output():
         / "results")
 
 
-    shutil.rmtree(f"{pt}/VanKeken", ignore_errors=True)
+    shutil.rmtree(f"{pt}", ignore_errors=True)
 
 # ---
 # --- 
@@ -60,11 +63,7 @@ def test_integration_test_double():
     rv,mc = read_summary(output=output)
     assert np.isclose(rv,1182.95,rtol=1e-2)
     assert np.isclose(mc,9.59,rtol=1e-2)
-    
-    
-
-
-
+# --- 
 def test_integration_single_market_a():
 
 
@@ -90,9 +89,7 @@ def test_integration_single_market_a():
     rv,mc = read_summary(output=output)
     assert np.isclose(rv,937.06,rtol=1e-2)
     assert np.isclose(mc,9.48,rtol=1e-2)
-    
-
-
+# --- 
 def test_integration_single_market_b():
 
 
@@ -118,3 +115,5 @@ def test_integration_single_market_b():
     rv,mc = read_summary(output=output)
     assert np.isclose(rv,1092.28,rtol=1e-2)
     assert np.isclose(mc,9.59,rtol=1e-2)
+# ---
+# --- 

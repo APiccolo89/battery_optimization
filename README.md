@@ -1,43 +1,4 @@
 # Preliminary documentation: 
-## Package layout
-```
-opti_market
-├── base_configuration
-│   ├── double_market.yml
-│   └── single_market.yml
-├── src
-│   └── opti_market
-│       ├── config_module
-│       │   ├── __init__.py
-│       │   ├── configuration_read.py
-│       │   ├── configure_battery.py
-│       │   └── configure_market.py
-│       ├── data
-│       │   └── battery_data_base.yaml
-│       ├── optimisation_module
-│       │   ├── __init__.py
-│       │   ├── design_note.md
-│       │   └── optimization_routines.py
-│       ├── utils_module
-│       └── __init__.py
-├── study_case
-│   ├── convert_timeseries.py
-│   ├── market_case.xlsx
-│   ├── market1.csv
-│   └── market2.csv
-├── tests
-│   ├── __init__.py
-│   ├── test_config_battery.py
-│   ├── test_config_read_market.py
-│   └── test_configuration.py
-├── conda_enviroment.yml
-├── pyproject.toml
-└── README.md
-```
-## Installation
-
-## Basic usage
-
 
 ## Introduction
 1. I used an example found in https://github.com/klostest/energy_arbitrage_work_sample/blob/master/Energy%20arbitrage.ipynb
@@ -55,6 +16,102 @@ in configuration.yml (base), there is a starting date and a window. The window d
 >1. I am not accustomed to the non-linearities, so the degradation of the battery will be treated as a state updated every n days.
 >2. Another simplifying assumption is that the user cannot start the simulation partway through a day, but always at 00:00 on the starting date.
 >3. AI: Assistance, I used the AI to ask specific functionalities of pulp, and code revision, and provide example of usage of pulp. 
+
+
+## Package layout
+```
+opti_market
+├── base_configuration
+│   ├── blue_print.yml
+│   ├── double_market.yml
+│   ├── single_market_a.yml
+│   └── single_market_b.yml
+├── conda_enviroment.yml
+├── pyproject.toml
+├── README.md
+├── src
+│   └── opti_market
+│       ├── __init__.py
+│       ├── __main__.py
+│       ├── config_module
+│       │   ├── __init__.py
+│       │   ├── configuration_read.py
+│       │   ├── configure_battery.py
+│       │   ├── configure_market.py
+│       │   ├── configure_output.py
+│       │   └── configure_simulation.py
+│       ├── data
+│       │   └── battery_data_base.yaml
+│       ├── opti_market.py
+│       ├── optimisation_module
+│       │   ├── __init__.py
+│       │   └── optimization_routines.py
+│       └── output_module
+│           ├── __init__.py
+│           └── write_csv_data.py
+├── study_case
+│   ├── convert_timeseries.py
+│   ├── market_case.xlsx
+│   ├── market1.csv
+│   └── market2.csv
+└── tests
+    ├── __init__.py
+    ├── configuration_folder_tests
+    │   ├── double_market.yml
+    │   ├── single_market_a.yml
+    │   └── single_market_b.yml
+    ├── test_config_battery.py
+    ├── test_config_read_market.py
+    ├── test_configuration.py
+    └── test_optimization.py
+```
+## Installation
+
+To install the package: 
+```bash 
+conda env create -f opti_market_enviroment.yml
+```
+Then:
+```bash
+conda activate battery_optimization
+```
+To run the tests:
+```bash
+pytest 
+```
+>[!NOTE]
+> The tests are basic, and they refer to a specific configurations folder within the test. 
+> The test has been generating while doing the package, thus they are not representative of the intended usage of the package. However, they can be used for generating scripts that use the functionalities of **opti_market**.
+
+## Basic usage
+The package has been designed to require always a configuration file. The basic templates for the task are in /base_configuration: 
+- blue_print.yml: a basic reference for the configuration file
+- single_market_a: optimization only for the market whose prices are defined every 0.5 Hr
+- single_market_b: optimization only for the market whose prices are defined every 1.0 Hr
+- double_market: optimization for both the market of the handout. 
+
+The simplest usage is the following (in Linux/MacOS): 
+```bash 
+export pack_package="$PWD"
+
+python -m opti_market --config_file "${PWD}/base_configuration/double_market.yml"
+
+```
+After the optimization, the results are stored in: 
+```
+results/
+  └── Double_Market/
+        ├── Data_Raw/
+        |    ├── market_n1.csv
+        |    └── market_n2.csv
+        ├── Data_Window/
+        |    └── window_optimisation_results.csv
+        └── summary.csv
+```
+- Data_Raw: are the results per period of the market results (e.g.,market_n1.csv and market_n2.csv)
+- Data_Window: are the results of the window of optimisation (merged for all the market): (e.g. window_optimisation_results.csv)
+- summary.csv: is the summary data. 
+
 ## Configuration file 
 ```yaml 
 simulation:
