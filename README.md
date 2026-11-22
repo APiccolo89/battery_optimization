@@ -22,7 +22,7 @@ opti_market
 │   ├── double_market.yml
 │   ├── single_market_a.yml
 │   └── single_market_b.yml
-├── conda_enviroment.yml
+├── opti_market_enviroment.yml
 ├── pyproject.toml
 ├── README.md
 ├── src
@@ -136,7 +136,6 @@ results/
 | `final_energy_mwh` | MWh | Energy stored in the battery at the end of the last window. |
 | `market_revenues:<market>` | GBP | Net revenue of each market over the whole simulation. Negative when the battery mainly buys in that market. The market values add up to `total_revenue`. |
 | `battery_cyles` | cycles | Equivalent full cycles at the end of the simulation, including any `initial_cycles` of the battery. One cycle = discharging the full storage capacity; partial discharges add up. |
-| `total_energy_left_mwh` | MWh | Energy left in the battery at the end of the simulation. |
 | `effective_max_pow_mw` | MWh | Storage capacity at the end of the simulation, after degradation (initially `max_storage_vol`, 4 MWh for bt001). |
 
 ## Three template final results

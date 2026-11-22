@@ -26,6 +26,6 @@ simulation:
   
   output: 
     path_to_save: null
-    basic_plot: True
+    basic_plot: False
     default_location: True
     clean_option: True
