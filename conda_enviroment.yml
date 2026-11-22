@@ -8,6 +8,7 @@ dependencies:
   - pyyaml
   - matplotlib
   - pytest
+  - ruff
   - pip
   - openpyxl
   - pip:

@@ -8,6 +8,8 @@ grid is rebuilt from the first timestamp and the number of rows.
  
 Usage:
     python convert_prices.py path/to/prices.xlsx data/
+    
+[Claude]: This script has been done using claude. 
 """
  
 import sys
@@ -17,8 +19,8 @@ import pandas as pd
  
 # sheet name -> (output file name, time step)
 SHEETS = {
-    "Half-hourly data": ("market1_halfhourly.csv", "30min"),
-    "Hourly data": ("market2_hourly.csv", "1h"),
+    "Half-hourly data": ("market1.csv", "30min"),
+    "Hourly data": ("market2.csv", "1h"),
 }
  
  

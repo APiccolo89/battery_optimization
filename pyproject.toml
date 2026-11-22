@@ -8,4 +8,4 @@ version = "0.1.0"
 dependencies = ["numpy", "pyyaml", "pulp", "highspy"]
 
 [tool.setuptools.packages.find]
-where = ["src/opti_market"]
+where = ["src"]
