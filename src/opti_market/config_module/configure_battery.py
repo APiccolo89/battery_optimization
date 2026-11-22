@@ -5,7 +5,7 @@ from typing import Literal
 import numpy as np
 import yaml
 
-DegradationModel = Literal["linear", "compound"]
+DegradationModel = Literal["linear", "compound","none"]
 
 
 @dataclass(frozen=True)
@@ -149,6 +149,8 @@ class BATTERY:
             E_anal = (self.effective_max_storage_vol - E0) / np.log(1 - degradation)
         elif self.degradation_model == "linear":
             E_anal = E0 * (n - degradation * n**2 / 2)
+        elif self.degradation_model == "none":
+            E_anal = E0 * n
         else:
             raise ValueError("Wrong degradation model")
 
@@ -173,6 +175,8 @@ class BATTERY:
             ) * (
                 1 - self.get_spec_battery("degradation") / 100 * self.total_number_cycle
             )
+        if self.degradation_model == "none":
+            self.effective_max_storage_vol = self.get_spec_battery("max_storage_vol")
 
     # ---
     def _update_cycle(self, dE: float) -> None:

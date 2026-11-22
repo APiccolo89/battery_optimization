@@ -146,7 +146,7 @@ def configure_problem(
     max_dch = bat.get_spec_battery("max_discharge_rate")
     max_cha = bat.get_spec_battery("max_charge_rate")
 
-    prob += total_energy_uncharged <= opti_mar.max_cycles * max_pow, "cycle_day_limit"
+    prob += total_energy_uncharged <= opti_mar.max_cycles * opti_mar.window_day.days * max_pow, "cycle_day_limit"
     if opti_interval == 0:
         prob += (
             bat_prb["energy_bat"][0] == bat.initial_charge * max_pow,
