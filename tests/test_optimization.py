@@ -1,8 +1,10 @@
+import shutil
 from importlib.resources import files
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from opti_market.config_module import (
     BATTERY,
@@ -13,20 +15,32 @@ from opti_market.config_module import (
 )
 from opti_market.optimisation_module import solve_problem
 
+@pytest.fixture(scope="session", autouse=True)
+def cleanup_output():
+    yield
+    pt = str(
+        Path(str(files("opti_market"))).resolve().parents[1]
+        / "results")
+
+
+    shutil.rmtree(f"{pt}/VanKeken", ignore_errors=True)
 
 # ---
 # --- 
-def read_summary()->float:
+def read_summary(output: Output) -> tuple[float, float]:
+    """Read the run summary and return (total revenue in GBP, battery cycles)."""
+    file = Path(output.path_to_save) / "summary.csv"
+    table = pd.read_csv(file).set_index("metric")["value"]
 
-
-    return revenue  
+    revenue = float(table["total_revenue"])
+    cycles = float(table["battery_cyles"])
+    return revenue, cycles
 # ---
 def test_integration_test_double():
 
-
-    pathtoconfig = str(
+    pathtoconfig =  str(
         Path(str(files("opti_market"))).resolve().parents[1]
-        / "base_configuration"
+        / "tests" / "configuration_folder_tests"
         / "double_market.yml"
     )
 
@@ -42,6 +56,12 @@ def test_integration_test_double():
     
     
     solve_problem(opti_opt=opti_opt, markt=markt, bat=bat,output=output)
+    # See if the total revenue and total cycles are the correct one
+    rv,mc = read_summary(output=output)
+    assert np.isclose(rv,1182.95,rtol=1e-2)
+    assert np.isclose(mc,9.59,rtol=1e-2)
+    
+    
 
 
 
@@ -50,7 +70,7 @@ def test_integration_single_market_a():
 
     pathtoconfig = str(
         Path(str(files("opti_market"))).resolve().parents[1]
-        / "base_configuration"
+        / "tests" / "configuration_folder_tests"
         / "single_market_a.yml"
     )
 
@@ -66,13 +86,19 @@ def test_integration_single_market_a():
     
     
     solve_problem(opti_opt=opti_opt, markt=markt, bat=bat,output=output)
+    # See if the total revenue and total cycles are the correct one
+    rv,mc = read_summary(output=output)
+    assert np.isclose(rv,937.06,rtol=1e-2)
+    assert np.isclose(mc,9.48,rtol=1e-2)
+    
+
 
 def test_integration_single_market_b():
 
 
-    pathtoconfig = str(
+    pathtoconfig =  str(
         Path(str(files("opti_market"))).resolve().parents[1]
-        / "base_configuration"
+        / "tests" / "configuration_folder_tests"
         / "single_market_b.yml"
     )
 
@@ -88,3 +114,7 @@ def test_integration_single_market_b():
     
     
     solve_problem(opti_opt=opti_opt, markt=markt, bat=bat,output=output)
+    # See if the total revenue and total cycles are the correct one
+    rv,mc = read_summary(output=output)
+    assert np.isclose(rv,1092.28,rtol=1e-2)
+    assert np.isclose(mc,9.59,rtol=1e-2)
