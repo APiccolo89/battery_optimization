@@ -69,7 +69,7 @@ def add_market(
 
 # ---
 def battery_confg(
-    prob: pulp.LpProblem, bat: BATTERY, time_vec_len: int
+    prob: pulp.LpProblem, bat: BATTERY, time_vec_len: int,
 min_charge:float) -> dict[str, dict[int, pulp.LpVariable]]:
     # Defining output data
 
@@ -108,7 +108,8 @@ def configure_problem(
     prob = pulp.LpProblem(name_problem, pulp.LpMaximize)
     t_vc = int((_MIN_DAY_ * opti_mar.window_day.days) / mar.dt)
     dt_hr = mar.dt / _MIN_HR_
-    bat_prb = battery_confg(prob=prob, bat=bat, time_vec_len=t_vc)
+    bat_prb = battery_confg(prob=prob, bat=bat, time_vec_len=t_vc
+                            ,min_charge=opti_mar.charge_min)
     time_step = range(t_vc)
     # Set the market variables
     for i in range(1, mar.n_market + 1):
