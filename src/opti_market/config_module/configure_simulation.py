@@ -1,8 +1,7 @@
-from dataclasses import InitVar, dataclass, field
-from pathlib import Path
+
+from dataclasses import dataclass
 from typing import Any
 
-import numpy as np
 import pandas as pd
 
 
@@ -33,14 +32,11 @@ class Opti_Market_Options:
             max_cycles=max_cycles,
             charge_min=charge_min,
         )
-
-
 # ---
 def _parse_dates(
     sd: str, ed: str | None, window: pd.Timedelta
 ) -> tuple[pd.Timestamp, pd.Timestamp]:
     """Parse the date and compute the number of intervals
-
 
     Args:
         sd (str): starting date
@@ -77,7 +73,5 @@ def _parse_dates(
         )
 
     return parsed_sd, parsed_ed
-
-
 # ---
 # ---

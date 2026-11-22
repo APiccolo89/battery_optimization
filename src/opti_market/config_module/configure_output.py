@@ -10,9 +10,10 @@ from typing import Any
 class Output:
     path_to_save: Path
     basic_plot: bool
+    clean_option: bool
     # --- 
     @staticmethod
-    def prepare(path:Path) -> Path:
+    def prepare(path:Path) ->None:
         """Create the output folder if needed and return it."""
         path.mkdir(parents=True, exist_ok=True)
     # --- 
@@ -28,4 +29,5 @@ class Output:
         cls.prepare(path)
         
         return cls(path_to_save=path,
-                   basic_plot=dict_config["basic_plot"])
+                   basic_plot=dict_config["basic_plot"],
+                   clean_option=dict_config['clean_option'])

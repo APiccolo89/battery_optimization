@@ -11,7 +11,7 @@ DegradationModel = Literal["linear", "compound"]
 @dataclass(frozen=True)
 class BATTERY_SPEC:
     """Class containing the information of the battery:
-    model_name:float32 :model name
+    model_name:str :model name
     max_discharge_rate:float32 :maximum volume that can be export (MW)
     max_charge_rate:float32 :maximum volume that can be import (MW)
     max_storage_vol:float32: maximum volume storage (MWh)
