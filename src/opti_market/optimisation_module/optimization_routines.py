@@ -1,11 +1,12 @@
-from typing import TypedDict
+from pathlib import Path
+from typing import TypedDict, Any
 
 import numpy as np
 import pandas as pd
 import pulp
 from numpy.typing import NDArray
 
-from opti_market.config_module import BATTERY, Markets, Opti_Market_Options
+from opti_market.config_module import BATTERY, Markets, Opti_Market_Options, Output
 
 # ---
 # ---
@@ -19,8 +20,19 @@ class MarketProblem(TypedDict):
     discharge: VarDict
     res: int
     prices: NDArray[np.float64]
+# --- To Move in Output
+DATA_RAW = ("timestamp", "price_gbp_per_mwh", "charge_mw", "discharge_mw", "revenue_gbp")
+DATA_WINDOW_ = ("start", "end", "total_revenue_gbp", "energy_end_mwh", "discharged_mwh")
+
+
 # ---
 # ---
+def create_path(path: Path) -> Path:
+    path.mkdir(parents=True, exist_ok=True)
+
+    return path 
+
+
 def select_range_prices(
     tar_markt: pd.DataFrame, date: pd.Timestamp, window: pd.Timedelta
 ) -> NDArray[np.float64]:
@@ -71,7 +83,7 @@ def battery_confg(
         "effective_bat_pwr",
         range(time_vec_len + 1),
         lowBound=0.0,
-        upBound=bat.get_spec_battery("max_storage_vol"),
+        upBound=bat.effective_max_storage_vol,
     )
     config_bat: dict[str, dict[int, pulp.LpVariable]] = {
         "charge_binary": charge_binary,
@@ -157,10 +169,90 @@ def configure_problem(
         prob += discharge <= max_dch * (1 - bat_prb["charge_binary"][i])
 
     return prob, mkrt_prb, bat_prb
+# --- # TO MOVE OUTPUT MODULE
+def save_data_raw(output:Output,
+                   bat_cfg:dict[str, dict[int, pulp.LpVariable]],
+                   markt:dict[str, MarketProblem],
+                   prob:pulp.LpProblem,
+                   time_information:tuple[pd.Timestamp,float,pd.Timedelta]) -> list[float]: 
+    path = create_path(Path(output.path_to_save / 'Data_Raw'))
+    # save markets data
+    dt_min = time_information[1]                                   # model step, minutes
+    total_revenue: list[float] = []
+    for name, m in markt.items():
+        period = pd.Timedelta(minutes=dt_min) * m["res"]           # length of one market period
+        period_hours = period / pd.Timedelta(hours=1)
+        start = time_information[0]
+
+        rows : Any = []
+        tot_rv = 0.0 
+        for p in range(len(m["prices"])):
+            charge = m["charge"][p].value() or 0.0
+            discharge = m["discharge"][p].value() or 0.0
+            reveneue = float(m["prices"][p]) * float(period_hours * (discharge - charge))
+            rows.append({
+                "timestamp": start,
+                "price_gbp_per_mwh": float(m["prices"][p]),
+                "charge_mw": charge,
+                "discharge_mw": discharge,
+                "revenue_gbp": reveneue,
+            })
+            start = start + period
+            tot_rv = tot_rv + float(reveneue)
+        total_revenue.append(tot_rv)
+        df = pd.DataFrame(rows, columns=DATA_RAW)
+        file = Path(path) / f"{name}.csv"
+        df.to_csv(file, mode="a", 
+                  header=not file.exists(), 
+                  index=False,
+                  float_format="%.3f")
+    return total_revenue
+# --- 
+def save_window(output:Output,
+                   bat_prb:dict[str, dict[int, pulp.LpVariable]],
+                   markt:dict[str, MarketProblem],
+                   prob:pulp.LpProblem,
+                   time_information:tuple[pd.Timestamp,float,pd.Timedelta]
+                   ,total_revenue:list[float]) -> None: 
+    
+    path = create_path(Path(output.path_to_save / 'Data_Window'))
+    start = time_information[0]
+    end = time_information[0]+time_information[2]
+    energy = bat_prb["energy_bat"]
+    rows:Any = []
+    values = np.array([pulp.value(energy[t]) for t in range(len(energy))])
+    steps = np.diff(values)
+    rows.append({
+                 "start": start,
+                 "end": end,
+                "total_revenue_gbp": sum(total_revenue),
+                "energy_end_mwh": values[-1],
+                "discharged_mwh": -steps[steps < 0].sum(),
+                })
+    df = pd.DataFrame(rows, columns=DATA_WINDOW_)
+    file_name = path / "window_optimisation_results.csv"
+    df.to_csv(file_name, mode="a", 
+              header=not file_name.exists(), 
+              index=False, float_format="%.3f")
 # ---
+def output_results_opti(output:Output,
+                   bat_cfg:dict[str, dict[int, pulp.LpVariable]],
+                   markt:dict[str, MarketProblem],
+                   prob:pulp.LpProblem,
+                   time_information:tuple[pd.Timestamp
+                                       ,float
+                                       ,pd.Timedelta])->None:
+
+    revenue = save_data_raw(output, bat_cfg, markt, prob, time_information)
+    save_window(output, bat_cfg, markt, prob, time_information, revenue)
+
+# --- 
 def solve_problem(
-    opti_opt: Opti_Market_Options, bat: BATTERY, markt: Markets
-) -> pd.DataFrame:
+    opti_opt: Opti_Market_Options
+    , bat: BATTERY
+    , markt: Markets
+    ,output: Output
+) -> None:
 
     interval = opti_opt.end_date - opti_opt.start_date
     n_opt_max = int(interval / opti_opt.window_day)
@@ -184,24 +276,28 @@ def solve_problem(
         status = stats.status.name
         assert status == "Optimal", status
         print(
-            f"{pulp.value(prob.objective):.2f} profit for {start} to {start + opti_opt.window_day}"
+            f"{         pulp.value(prob.objective):.2f} profit for {start} to {start + opti_opt.window_day}"
         )
-        start = start + opti_opt.window_day
-        final_energy_index = len(bat_prb["energy_bat"]) - 1
-        final_energy = pulp.value(bat_prb["energy_bat"][final_energy_index])
-        if final_energy is None:
-            raise RuntimeError("Solver did not return a final battery energy value")
-        start_energy = final_energy  # MWh at the end of the window
-        total_energy_left = total_energy_left + final_energy
-        bat.update_state_battery(dE=final_energy)
+        # --- Save the raw data set and the windows average  
+        output_results_opti(output=output,
+                      bat_cfg=bat_prb,
+                      markt=mkrt_prb,
+                      prob=prob,
+                      time_information=(start
+                                        ,markt.dt
+                                        ,opti_opt.window_day))
+        # -- Update the data for starting an other optimization window
+        energy = np.array([bat_prb["energy_bat"][t].value() for t in range(len(bat_prb["energy_bat"]))])        
+        final_energy = energy[-1]                       # state at the end -> next window
+        steps = np.diff(energy)
+        discharged = -steps[steps < 0].sum()            # flow during the window, positive
+        bat.update_state_battery(dE=-discharged)        # your method expects it negative
+        start_energy = min(max(final_energy, 0.0), bat.effective_max_storage_vol)
         total_profit = total_profit + float(pulp.value(prob.objective))
-        
-    
+        start = start + opti_opt.window_day
     print(
         f"    TOTAL. {total_profit:.2f} profit for {opti_opt.start_date} to {opti_opt.end_date}",
     )
+    #final_results = generate_final_summary()
 
-    results_pd = pd.DataFrame([])
-
-    return results_pd
 # ---

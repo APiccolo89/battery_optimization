@@ -1,4 +1,5 @@
 simulation:
+  name: 'Random_name'
   optimization:
     window_days: 
     start_date:
@@ -20,7 +21,7 @@ simulation:
       prices_file: 
       path_to_file: 
       packaged_data:
-  outputs: 
+  output: 
     path_to_save: 
     basic_plot: 
-    in_the_packg: 
+    default_location: 

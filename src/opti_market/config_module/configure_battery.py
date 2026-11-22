@@ -189,8 +189,8 @@ class BATTERY:
 
     # ---
     def update_state_battery(self, dE: float) -> None:
-        if dE < 0:
-            raise ValueError("The total discharge must be always positive")
+        if dE > 0:
+            raise ValueError("The total discharge must be always negative")
         else:
             self._update_cycle(dE)
             self._update_effective_max_storage_vol()

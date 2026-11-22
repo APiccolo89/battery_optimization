@@ -51,8 +51,11 @@ _SIMULATION_INPUT_: dict[str, tuple[OptionKind, OptionValue]] = {
     ),  # I wanted to put a minimal residual charge, but for preserving the battery, also max_cycle can work.
     "window_days": ("opt", 1),
 }
-
-
+_OUTPUT_INPUT_ : dict[str, tuple[OptionKind, OptionValue]] = {
+    'path_to_save': ('opt',None),
+    'basic_plot': ('opt',False),
+    'default_location': ('opt',True) 
+        }
 # ---
 # ---
 def read_simulation_config(inp_dict: dict[str, Any]) -> dict[str, Any]:
@@ -60,6 +63,20 @@ def read_simulation_config(inp_dict: dict[str, Any]) -> dict[str, Any]:
     sim_config = check_input(inp_dict=inp_dict, par=_SIMULATION_INPUT_)
 
     return sim_config
+
+# --- 
+def read_simulation_output(inp_dict: dict[str, Any]) -> dict[str, Any]:
+
+    output_configuration = check_input(inp_dict=inp_dict, par=_OUTPUT_INPUT_)
+    # Safe Guard. 
+    if output_configuration['path_to_save'] == '':
+        output_configuration['path_to_save'] = None
+
+    if (output_configuration['path_to_save'] is not None
+        and (output_configuration['default_location'])):
+        raise ValueError('The default location cannot be True, if a path_to_save is specified')
+
+    return output_configuration
 
 
 # ---
@@ -166,8 +183,6 @@ def read_markets(markt: dict[str, Any]) -> dict[str, Any]:
         markets[i] = data
 
     return markets
-
-
 # ---
 def post_process_config_file(
     pre_config: dict[str, Any], config_fin: dict[str, Any]
@@ -190,6 +205,8 @@ def post_process_config_file(
     config_fin["sim_options"] = read_simulation_config(
         pre_config["simulation"]["optimization"]
     )
+    config_fin['output'] = read_simulation_output(pre_config["simulation"]["output"])
+    config_fin['name'] = pre_config["simulation"]["name"]
 
 
 # ---
