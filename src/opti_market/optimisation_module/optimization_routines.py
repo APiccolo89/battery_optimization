@@ -79,7 +79,7 @@ min_charge:float) -> dict[str, dict[int, pulp.LpVariable]]:
     energy_bat = prob.add_variable_dicts(
         "effective_bat_pwr",
         range(time_vec_len + 1),
-        lowBound=charge_min * capacity,
+        lowBound=min_charge * bat.effective_max_storage_vol,
         upBound=bat.effective_max_storage_vol,
     )
     config_bat: dict[str, dict[int, pulp.LpVariable]] = {
