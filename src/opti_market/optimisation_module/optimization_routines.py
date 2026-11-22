@@ -193,7 +193,6 @@ def solve_problem(
         "final_energy_mwh": 0.0,
         "market_revenues": {name: 0.0 for name in market_names},
         "battery_cyles": 0.0,
-        "total_energy_left_mwh": 0.0,
         "effective_max_pow_mw": 0.0,
     }
 
@@ -239,7 +238,7 @@ def solve_problem(
     summary["total_revenue"] = total_profit
     summary["effective_max_pow_mw"] = bat.effective_max_storage_vol
     summary["battery_cyles"] = bat.total_number_cycle
-    summary["final_energy_mwh"] = start_energy
+    summary["final_energy_mwh"] = final_energy
     print_summary(summary)
     save_summary(summary=summary, output=output)
 

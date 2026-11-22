@@ -1,5 +1,5 @@
 simulation:
-  name : Double_Market
+  name : Double_Market_min_charge
   optimization:
     window_days: 1 # Date in [us]
     start_date: 2018/01/01
