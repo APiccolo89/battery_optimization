@@ -70,7 +70,7 @@ def add_market(
 # ---
 def battery_confg(
     prob: pulp.LpProblem, bat: BATTERY, time_vec_len: int
-) -> dict[str, dict[int, pulp.LpVariable]]:
+min_charge:float) -> dict[str, dict[int, pulp.LpVariable]]:
     # Defining output data
 
     charge_binary = prob.add_variable_dicts(
@@ -79,7 +79,7 @@ def battery_confg(
     energy_bat = prob.add_variable_dicts(
         "effective_bat_pwr",
         range(time_vec_len + 1),
-        lowBound=0.0,
+        lowBound=charge_min * capacity,
         upBound=bat.effective_max_storage_vol,
     )
     config_bat: dict[str, dict[int, pulp.LpVariable]] = {

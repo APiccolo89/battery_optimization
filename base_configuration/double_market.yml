@@ -3,7 +3,7 @@ simulation:
   optimization:
     window_days: 1 # Date in [us]
     start_date: 2018/01/01
-    end_date: 2019/01/02
+    end_date: 2019/01/08
     max_cycles: 1.37 # Maximum cycle of the battery 
     charge_min: 0.0 # The minimal energy of the battery that must be retained
 
