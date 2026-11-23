@@ -251,8 +251,26 @@ def read_configuration(config_file: str) -> dict[str, dict[str, Any]]:
         )
 
     return configurations_sim
+# ---
+def check_consistency(markt:Markets,opti_opt:Opti_Market_Options)->None:
+    """Check if the starting date of the simulation is consistent with the
+    common start/end of the markets
 
+    Args:
+        markt (Markets): Markets class 
+        opti_opt (Opti_Market_Options): optimization option
 
+    Raises:
+        ValueError: The starting date of the simulation predates the markets timeseries.
+        ValueError: The ending date of the simulation is after the final date of the markets timeseries. 
+    """
+    
+    if opti_opt.start_date < markt.common_start: 
+        raise ValueError(' The simulation starts before the initial common time frame of the markets')
+    elif opti_opt.end_date > markt.common_end: 
+        raise ValueError(' The simulation ends after the final common time frame of the markets')
+
+    
 # ---
 def read_configurations_files(
     config_file: str,
@@ -279,6 +297,8 @@ def read_configurations_files(
         dict_config=configuration_sim["output"],
         name_simulation=str(configuration_sim["name"]),
     )
+    
+    check_consistency(markt=markt,opti_opt=opti_opt)
 
     return bat, markt, opti_opt, output
 
