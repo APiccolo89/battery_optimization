@@ -14,14 +14,11 @@ class Output:
 
     Attributes:
         path_to_save (Path): folder where the results are written.
-        basic_plot (bool): plot flag read from the configuration; not used
-            elsewhere in the package.
         clean_option (bool): if True, an existing results folder is removed
             before the run.
     """
 
     path_to_save: Path
-    basic_plot: bool
     clean_option: bool
 
     # ---
@@ -46,6 +43,5 @@ class Output:
 
         return cls(
             path_to_save=path,
-            basic_plot=dict_config["basic_plot"],
             clean_option=dict_config["clean_option"],
         )

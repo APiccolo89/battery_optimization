@@ -195,7 +195,6 @@ simulation:
       packaged_data:
   output:
     path_to_save:
-    basic_plot:
     default_location:
     clean_option:
 ```
@@ -245,7 +244,6 @@ One block per market (`market1`, `market2`, …; at most 6). The names are free;
 | `default_location` | no | True | If True, the results are saved in `<repository>/results/<name>`. |
 | `path_to_save` | no | null | Folder where the results are saved (`<path_to_save>/results/<name>`). Use it with `default_location: False`. |
 | `clean_option` | no | True | If the output folder already exists, True deletes it and writes the new results; False stops the program. |
-| `basic_plot` | no | False | Reserved for plotting. Not used in the current version. |
 
 ### Example
 
@@ -277,7 +275,6 @@ simulation:
       packaged_data: True
   output:
     path_to_save: null
-    basic_plot: True
     default_location: True
     clean_option: True
 ```

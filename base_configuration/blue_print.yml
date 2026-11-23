@@ -23,6 +23,5 @@ simulation:
       packaged_data:
   output: 
     path_to_save: 
-    basic_plot: 
     default_location: 
     clean_option: 

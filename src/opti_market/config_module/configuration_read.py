@@ -58,7 +58,6 @@ _SIMULATION_INPUT_: dict[str, tuple[OptionKind, OptionValue]] = {
 }
 _OUTPUT_INPUT_: dict[str, tuple[OptionKind, OptionValue]] = {
     "path_to_save": ("opt", None),
-    "basic_plot": ("opt", False),
     "default_location": ("opt", True),
     "clean_option": ("opt", True),
 }
