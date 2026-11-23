@@ -227,8 +227,8 @@ def solve_problem(
         )
         final_energy = energy[-1]  # state at the end -> next window
         steps = np.diff(energy)
-        discharged = -steps[steps < 0].sum()  # flow during the window, positive
-        bat.update_state_battery(dE=-discharged)  # your method expects it negative
+        discharged = -steps[steps < 0].sum()  
+        bat.update_state_battery(dE=-discharged)  
         start_energy = min(max(final_energy, 0.0), bat.effective_max_storage_vol)
         total_profit = total_profit + float(pulp.value(prob.objective))
         start = start + opti_opt.window_day

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "battery_optimization"
 version = "0.1.0"
-dependencies = ["numpy", "pyyaml", "pulp", "highspy"]
+dependencies = ["numpy", "pyyaml", "pulp", "highspy","pandas"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
