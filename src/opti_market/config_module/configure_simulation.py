@@ -1,3 +1,5 @@
+"""Simulation options: window, start and end dates, cycle limit, minimum charge."""
+
 from dataclasses import dataclass
 from typing import Any
 
@@ -8,6 +10,17 @@ import pandas as pd
 # ---
 @dataclass(frozen=True)
 class Opti_Market_Options:
+    """Options of the optimization.
+
+    Attributes:
+        window_day (pd.Timedelta): length of each optimization window.
+        start_date (pd.Timestamp): start of the simulation.
+        end_date (pd.Timestamp): end of the simulation (excluded).
+        max_cycles (float): maximum number of full cycles per day.
+        charge_min (float): minimum stored energy, as a fraction of the
+            effective maximum storage volume.
+    """
+
     window_day: pd.Timedelta
     start_date: pd.Timestamp
     end_date: pd.Timestamp
@@ -16,6 +29,18 @@ class Opti_Market_Options:
 
     @classmethod
     def read_optimisation_options(cls, dict_config: dict[str, Any]):
+        """Build the options from the 'optimization' section of the configuration.
+
+        Args:
+            dict_config (dict): simulation options from read_simulation_config.
+
+        Raises:
+            ValueError: if the simulation interval is not a multiple of the
+                window (raised by _parse_dates).
+
+        Returns:
+            Opti_Market_Options: the optimization options.
+        """
 
         window_day = pd.Timedelta(days=dict_config["window_days"])
         start_date, end_date = _parse_dates(
@@ -37,7 +62,7 @@ class Opti_Market_Options:
 def _parse_dates(
     sd: str, ed: str | None, window: pd.Timedelta
 ) -> tuple[pd.Timestamp, pd.Timestamp]:
-    """Parse the date and compute the number of intervals
+    """Parse the dates and compute the number of intervals.
 
     Args:
         sd (str): starting date

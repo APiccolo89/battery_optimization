@@ -1,3 +1,5 @@
+"""Market price timeseries and their common time step and time frame."""
+
 from dataclasses import InitVar, dataclass, field
 from math import gcd
 from pathlib import Path
@@ -15,6 +17,22 @@ _FRACTION_HOUR: tuple[float, ...] = (1 / 4, 1 / 2, 3 / 4, 1.0)
 # ---
 @dataclass
 class Markets:
+    """Price timeseries of up to six markets and their common time grid.
+
+    Attributes:
+        markets (dict): market configurations, each with "prices_file" and
+            "path_to_file" entries (init only).
+        n_market (int): number of markets.
+        market_n1 ... market_n6 (pd.DataFrame): price timeseries of each market;
+            unused slots are None.
+        common_start (pd.Timestamp): latest first timestamp among the markets.
+        common_end (pd.Timestamp): earliest last timestamp among the markets.
+        dt (float): common time step (minutes), the greatest common divisor of
+            the market time steps.
+        dt_steps (list[int]): number of common time steps in one period of each
+            market.
+    """
+
     markets: InitVar[dict[str, Any]]
     n_market: int = field(init=False)
     market_n1: pd.DataFrame = field(init=False)
@@ -27,10 +45,18 @@ class Markets:
     common_end: pd.Timestamp = field(init=False)
     dt: float = 0.0
     dt_steps: list[int] = field(init=False)
-    
 
     # ---
     def __post_init__(self, markets: dict[str, Any]):
+        """Read the price file of each market and set the common time grid.
+
+        Args:
+            markets (dict): market configurations, each with "prices_file" and
+                "path_to_file" entries.
+
+        Raises:
+            ValueError: if more than six markets are given.
+        """
         self.n_market = len(markets)
         if self.n_market > 6:
             raise ValueError("The maximum market per battery is 6. Reduce the markets")
@@ -47,28 +73,37 @@ class Markets:
 
         self._extract_dt()
         self._check_initial_final_date_markets()
-        
+
     # Find the common time interval
-    def _check_initial_final_date_markets(self)->None:
-        
-        start :list[pd.Timestamp] = []
-        end :list[pd.Timestamp] = []
+    def _check_initial_final_date_markets(self) -> None:
+        """Find the common time frame of the markets.
+
+        Set common_start to the latest first timestamp and common_end to the
+        earliest last timestamp among the markets.
+
+        Raises:
+            ValueError: if the markets do not overlap in time.
+        """
+
+        start: list[pd.Timestamp] = []
+        end: list[pd.Timestamp] = []
         for k in range(self.n_market):
-            a = getattr(self,f'market_n{k+1}')
-            start.append(a['timestamp'].min())
-            end.append(a['timestamp'].max())
-        
+            a = getattr(self, f"market_n{k + 1}")
+            start.append(a["timestamp"].min())
+            end.append(a["timestamp"].max())
+
         self.common_start = max(start)
         self.common_end = min(end)
-        
+
         if self.common_start >= self.common_end:
             raise ValueError("The markets do not overlap in time")
+
     # ---
     def _extract_dt(self) -> None:
-        """Collect all the market, compute the dt per each market
+        """Collect all the markets, compute the dt for each market and
         choose the minimum denominator.
-        Before it, checks if the price are in any fraction of hours,
-        the accepted fraction of hours are 15/30/45/60 min.
+        Before that, check if the prices are in any fraction of an hour;
+        the accepted fractions of an hour are 15/30/45/60 min.
         total minutes day: 1440 % (_FRACTION_) = 64,48,32,24
         """
         dt_buf: float = 0.0
@@ -99,7 +134,7 @@ class Markets:
 # ---
 # ---
 def read_market(name: str, path: str) -> pd.DataFrame:
-    """Read the market csv file
+    """Read the market csv file.
 
     Args:
         name (str): name of the csv file

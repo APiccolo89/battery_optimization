@@ -1,3 +1,5 @@
+"""Battery specification and battery state during the simulation."""
+
 from dataclasses import InitVar, dataclass, field
 from pathlib import Path
 from typing import Literal
@@ -5,23 +7,23 @@ from typing import Literal
 import numpy as np
 import yaml
 
-DegradationModel = Literal["linear", "compound","none"]
+DegradationModel = Literal["linear", "compound", "none"]
 
 
 @dataclass(frozen=True)
 class BATTERY_SPEC:
     """Class containing the information of the battery:
     model_name:str :model name
-    max_discharge_rate:float32 :maximum volume that can be export (MW)
-    max_charge_rate:float32 :maximum volume that can be import (MW)
-    max_storage_vol:float32: maximum volume storage (MWh)
-    dicharge_eff: float32: efficiency of discharge
+    max_discharge_rate:float32 :maximum volume that can be exported (MW)
+    max_charge_rate:float32 :maximum volume that can be imported (MW)
+    max_storage_vol:float32: maximum storage volume (MWh)
+    discharge_eff: float32: efficiency of discharge
     charge_eff: float32: efficiency of charge
     max_cycle: int32: number of cycles of total charge/discharge of the battery
-    max_life: int32: maximum year in which the battery is guarantee to have its original specification - if not used- [?]
-    degradation: float32: given a number of cycle, the amount of total storage loss.
+    max_life: int32: maximum year in which the battery is guaranteed to have its original specification - if not used - [?]
+    degradation: float32: given a number of cycles, the amount of total storage loss.
     capex: float32: initial costs for installing the battery
-    fix_cost_yr: float32: fixed cost of the battery (maintainance...)
+    fix_cost_yr: float32: fixed cost of the battery (maintenance...)
     cur_cycle: int32: current cycle
     cur_age: int2: current age
     """
@@ -43,6 +45,26 @@ class BATTERY_SPEC:
 # ---
 @dataclass
 class BATTERY:
+    """Battery model and its state during the simulation.
+
+    The specification is read from the battery database (battery_data_base.yaml)
+    using model_name. The state (number of cycles, effective storage volume and
+    cumulative discharged energy) is updated after each optimisation window.
+
+    Attributes:
+        model_name (str): name of the battery model in the database (init only).
+        battery_spec (BATTERY_SPEC): specification of the battery model.
+        initial_charge (float): initial stored energy, as a fraction of the
+            effective maximum storage volume.
+        initial_cycles (float): number of cycles already performed by the battery.
+        initial_age (int): initial age of the battery.
+        effective_max_storage_vol (float): current maximum storage volume after
+            degradation (MWh).
+        total_number_cycle (float): current number of cycles.
+        cumulative_power_discharged (float): cumulative discharged energy (MWh).
+        degradation_model (str): "linear", "compound" or "none".
+    """
+
     model_name: InitVar[str]
     battery_spec: BATTERY_SPEC = field(init=False)
     # Initial state of the battery
@@ -68,9 +90,9 @@ class BATTERY:
     # define the concept of cycles
     # ---
     def __post_init__(self, model_name: str) -> None:
-        """Update the battery_spec
-        Read the yml file containing the battery specification
-        Fill the battery_spec sub-class
+        """Update the battery_spec.
+        Read the yml file containing the battery specification.
+        Fill the battery_spec sub-class.
 
         Args:
             mname (str): _description_
@@ -89,7 +111,7 @@ class BATTERY:
 
     # ---
     def read_yml_battery(self, mname: str) -> None:
-        """Read the yaml file containing the batteries information
+        """Read the yaml file containing the battery information.
 
         Args:
             mname (str): model name. battery model name.
@@ -126,9 +148,9 @@ class BATTERY:
 
     # ---
     def _update_total_discharge(self, dE: float) -> None:
-        """Update the total discharge
-        dE: total discharge for a given amount of time (i.e., sold energy to the market)
-        Update the energy discharge
+        """Update the total discharge.
+        dE: total discharge for a given amount of time (i.e., energy sold to the market).
+        Update the energy discharge.
         """
 
         if dE > 0:
@@ -140,7 +162,7 @@ class BATTERY:
     def analytical_total_discharge(self) -> float:
         """Compute the analytical total discharge.
         The analytical expression for the total energy can be derived
-        by a simple integration of the total number of cycle.
+        by a simple integration of the total number of cycles.
         """
         E0 = self.get_spec_battery("max_storage_vol")
         degradation = self.get_spec_battery("degradation") / 100
@@ -159,7 +181,7 @@ class BATTERY:
     # ---
     def _update_effective_max_storage_vol(self) -> None:
         """Update the effective max storage volume using
-        a compound forumation or a linear formulation.
+        a compound formulation or a linear formulation.
         TO DO: pyfile of global configuration to modify, or introducing
         directly the option in the class battery
         """
@@ -180,11 +202,11 @@ class BATTERY:
 
     # ---
     def _update_cycle(self, dE: float) -> None:
-        """Update the number of cycle using the current discharge
+        """Update the number of cycles using the current discharge
         and using the previous effective_max_volume.
 
         Args:
-            dE (float): currenty energy
+            dE (float): current energy
         """
 
         self.total_number_cycle = (
@@ -193,6 +215,17 @@ class BATTERY:
 
     # ---
     def update_state_battery(self, dE: float) -> None:
+        """Update the battery state after a discharge.
+
+        Update the number of cycles, the effective maximum storage volume and
+        the cumulative discharged energy, in this order.
+
+        Args:
+            dE (float): discharged energy (MWh), as a non-positive value.
+
+        Raises:
+            ValueError: if dE is positive.
+        """
         if dE > 0:
             raise ValueError("The total discharge must be always negative")
         else:

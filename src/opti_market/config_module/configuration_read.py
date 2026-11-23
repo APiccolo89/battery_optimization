@@ -1,8 +1,8 @@
 """
 Definition of options for the input configuration file.
 
-'man':'mandatory', => If it is not defined, the program is preventevely blocked
-'opt': 'fully optional, if anything is defined, the default value are applied'
+'man':'mandatory', => If it is not defined, the program is preventively blocked
+'opt': 'fully optional, if nothing is defined, the default values are applied'
 """
 
 from importlib.resources import files
@@ -58,7 +58,6 @@ _SIMULATION_INPUT_: dict[str, tuple[OptionKind, OptionValue]] = {
 }
 _OUTPUT_INPUT_: dict[str, tuple[OptionKind, OptionValue]] = {
     "path_to_save": ("opt", None),
-    "basic_plot": ("opt", False),
     "default_location": ("opt", True),
     "clean_option": ("opt", True),
 }
@@ -67,6 +66,17 @@ _OUTPUT_INPUT_: dict[str, tuple[OptionKind, OptionValue]] = {
 # ---
 # ---
 def read_simulation_config(inp_dict: dict[str, Any]) -> dict[str, Any]:
+    """Read the optimization section of the configuration file.
+
+    Check the input against _SIMULATION_INPUT_ and fill the missing
+    optional entries with their default values.
+
+    Args:
+        inp_dict (dict): optimization data field from the yml file.
+
+    Returns:
+        dict: complete set of simulation options, including defaults.
+    """
 
     sim_config = check_input(inp_dict=inp_dict, par=_SIMULATION_INPUT_)
 
@@ -75,6 +85,21 @@ def read_simulation_config(inp_dict: dict[str, Any]) -> dict[str, Any]:
 
 # ---
 def read_simulation_output(inp_dict: dict[str, Any]) -> dict[str, Any]:
+    """Read the output section of the configuration file.
+
+    Check the input against _OUTPUT_INPUT_, fill the missing optional
+    entries with their default values and convert an empty path_to_save
+    into None.
+
+    Args:
+        inp_dict (dict): output data field from the yml file.
+
+    Raises:
+        ValueError: if path_to_save is specified and default_location is True.
+
+    Returns:
+        dict: complete set of output options, including defaults.
+    """
 
     output_configuration = check_input(inp_dict=inp_dict, par=_OUTPUT_INPUT_)
     # Safe Guard.
@@ -94,13 +119,13 @@ def read_simulation_output(inp_dict: dict[str, Any]) -> dict[str, Any]:
 
 # ---
 def read_battery(inp_dict: dict[str, Any]) -> dict[str, Any]:
-    """Read the battery input data
-    Check the input, fill up the data with the default options
+    """Read the battery input data.
+    Check the input and fill in the data with the default options.
     Args:
-        inp_dict (dict): input battery data field from yml file
+        inp_dict (dict): input battery data field from the yml file.
 
     Returns:
-        dict: complete data set for battery with default.
+        dict: complete data set for the battery, with defaults.
     """
     battery = check_input(inp_dict=inp_dict, par=_BATTERY_INPUT_)
 
@@ -109,20 +134,20 @@ def read_battery(inp_dict: dict[str, Any]) -> dict[str, Any]:
 
 # ---
 def check_input(inp_dict: dict[str, Any], par: dict[str, Any]) -> dict[str, Any]:
-    """Check the input, and fill a new small dictionary
-    of input.
-    The function checks the data
+    """Check the input and fill a new small dictionary
+    of inputs.
+    The function checks the data.
 
     Args:
         inp_dict (dict): the data read from the configuration files
-        par (dict): the global parameter dictionary on top of this file
+        par (dict): the global parameter dictionary at the top of this file
 
     Raises:
-        ValueError: if the parameters is not defined (i.e., it is not specified),
+        ValueError: if the parameter is not defined (i.e., it is not specified)
         but it is mandatory, throw an error and highlight at least the name of the field
 
     Returns:
-        dict: completed dictionary with all the information for filling up the
+        dict: completed dictionary with all the information for filling in the
         real input configuration.
     """
     new_dict = dict.fromkeys(par, None)
@@ -145,7 +170,7 @@ def check_input(inp_dict: dict[str, Any], par: dict[str, Any]) -> dict[str, Any]
 
 # ---
 def read_markets(markt: dict[str, Any]) -> dict[str, Any]:
-    """Reads the market and convert path in case of flags.
+    """Read the market and convert the path in case of flags.
 
     Args:
         markets (dict): check the input data of the market and release
@@ -203,16 +228,16 @@ def post_process_config_file(
     pre_config: dict[str, Any], config_fin: dict[str, Any]
 ) -> None:
     """Use the original configuration file and construct the
-    effective configuration of the simulation
+    effective configuration of the simulation.
 
-    Reason: Since the take-home assignment has two market, I wanted
+    Reason: Since the take-home assignment has two markets, I wanted
     to flag the presence of these markets within the package, such
     that the behaviour is deterministic for the example, and also
-    to inform directly the unit/integration/regression test.
+    to directly inform the unit/integration/regression tests.
 
     Args:
         pre_config (dict): data read from the configuration file
-        config_fin (dict): final data for configure, battery and market classes
+        config_fin (dict): final data to configure the battery and market classes
     """
 
     config_fin["markets"] = read_markets(pre_config["simulation"]["markets"])
@@ -251,37 +276,43 @@ def read_configuration(config_file: str) -> dict[str, dict[str, Any]]:
         )
 
     return configurations_sim
+
+
 # ---
-def check_consistency(markt:Markets,opti_opt:Opti_Market_Options)->None:
+def check_consistency(markt: Markets, opti_opt: Opti_Market_Options) -> None:
     """Check if the starting date of the simulation is consistent with the
-    common start/end of the markets
+    common start/end of the markets.
 
     Args:
-        markt (Markets): Markets class 
-        opti_opt (Opti_Market_Options): optimization option
+        markt (Markets): Markets class
+        opti_opt (Opti_Market_Options): optimization options
 
     Raises:
-        ValueError: The starting date of the simulation predates the markets timeseries.
-        ValueError: The ending date of the simulation is after the final date of the markets timeseries. 
+        ValueError: The starting date of the simulation predates the market timeseries.
+        ValueError: The ending date of the simulation is after the final date of the market timeseries.
     """
-    
-    if opti_opt.start_date < markt.common_start: 
-        raise ValueError(' The simulation starts before the initial common time frame of the markets')
-    elif opti_opt.end_date > markt.common_end: 
-        raise ValueError(' The simulation ends after the final common time frame of the markets')
 
-    
+    if opti_opt.start_date < markt.common_start:
+        raise ValueError(
+            " The simulation starts before the initial common time frame of the markets"
+        )
+    elif opti_opt.end_date > markt.common_end:
+        raise ValueError(
+            " The simulation ends after the final common time frame of the markets"
+        )
+
+
 # ---
 def read_configurations_files(
     config_file: str,
 ) -> tuple[BATTERY, Markets, Opti_Market_Options, Output]:
-    """Configure the simulation using the configuration file
+    """Configure the simulation using the configuration file.
 
     Args:
         config_file (str): path to the configuration file
 
     Returns:
-        tuple[BATTERY, Markets, Opti_Market_Options, Output]: classes that handles the simulation behaviour
+        tuple[BATTERY, Markets, Opti_Market_Options, Output]: classes that handle the simulation behaviour
     """
 
     configuration_sim = read_configuration(config_file=config_file)
@@ -297,8 +328,8 @@ def read_configurations_files(
         dict_config=configuration_sim["output"],
         name_simulation=str(configuration_sim["name"]),
     )
-    
-    check_consistency(markt=markt,opti_opt=opti_opt)
+
+    check_consistency(markt=markt, opti_opt=opti_opt)
 
     return bat, markt, opti_opt, output
 

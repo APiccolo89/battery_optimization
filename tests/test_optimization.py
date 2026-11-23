@@ -16,20 +16,18 @@ from opti_market.config_module import (
 from opti_market.optimisation_module import solve_problem
 
 
-# --- 
-# --- 
+# ---
+# ---
 @pytest.fixture(scope="session", autouse=True)
 def cleanup_output():
     yield
-    pt = str(
-        Path(str(files("opti_market"))).resolve().parents[1]
-        / "results")
-
+    pt = str(Path(str(files("opti_market"))).resolve().parents[1] / "results")
 
     shutil.rmtree(f"{pt}", ignore_errors=True)
 
+
 # ---
-# --- 
+# ---
 def read_summary(output: Output) -> tuple[float, float]:
     """Read the run summary and return (total revenue in GBP, battery cycles)."""
     file = Path(output.path_to_save) / "summary.csv"
@@ -38,12 +36,15 @@ def read_summary(output: Output) -> tuple[float, float]:
     revenue = float(table["total_revenue"])
     cycles = float(table["battery_cyles"])
     return revenue, cycles
+
+
 # ---
 def test_integration_test_double():
 
-    pathtoconfig =  str(
+    pathtoconfig = str(
         Path(str(files("opti_market"))).resolve().parents[1]
-        / "tests" / "configuration_folder_tests"
+        / "tests"
+        / "configuration_folder_tests"
         / "double_market.yml"
     )
 
@@ -54,22 +55,24 @@ def test_integration_test_double():
     markt = Markets(config_sim["markets"])
     # Solution options: {To Do: seeing the other options}
     opti_opt = Opti_Market_Options.read_optimisation_options(config_sim["sim_options"])
-    output = Output.read_output_configuration(dict_config=config_sim["output"]
-                                              , name_simulation=str(config_sim["name"]))
-    
-    
-    solve_problem(opti_opt=opti_opt, markt=markt, bat=bat,output=output)
-    # See if the total revenue and total cycles are the correct one
-    rv,mc = read_summary(output=output)
-    assert np.isclose(rv,1182.95,rtol=1e-2)
-    assert np.isclose(mc,9.59,rtol=1e-2)
-# --- 
-def test_integration_single_market_a():
+    output = Output.read_output_configuration(
+        dict_config=config_sim["output"], name_simulation=str(config_sim["name"])
+    )
 
+    solve_problem(opti_opt=opti_opt, markt=markt, bat=bat, output=output)
+    # See if the total revenue and total cycles are the correct one
+    rv, mc = read_summary(output=output)
+    assert np.isclose(rv, 1182.95, rtol=1e-2)
+    assert np.isclose(mc, 9.59, rtol=1e-2)
+
+
+# ---
+def test_integration_single_market_a():
 
     pathtoconfig = str(
         Path(str(files("opti_market"))).resolve().parents[1]
-        / "tests" / "configuration_folder_tests"
+        / "tests"
+        / "configuration_folder_tests"
         / "single_market_a.yml"
     )
 
@@ -80,22 +83,24 @@ def test_integration_single_market_a():
     markt = Markets(config_sim["markets"])
     # Solution options: {To Do: seeing the other options}
     opti_opt = Opti_Market_Options.read_optimisation_options(config_sim["sim_options"])
-    output = Output.read_output_configuration(dict_config=config_sim["output"]
-                                              , name_simulation=str(config_sim["name"]))
-    
-    
-    solve_problem(opti_opt=opti_opt, markt=markt, bat=bat,output=output)
+    output = Output.read_output_configuration(
+        dict_config=config_sim["output"], name_simulation=str(config_sim["name"])
+    )
+
+    solve_problem(opti_opt=opti_opt, markt=markt, bat=bat, output=output)
     # See if the total revenue and total cycles are the correct one
-    rv,mc = read_summary(output=output)
-    assert np.isclose(rv,937.06,rtol=1e-2)
-    assert np.isclose(mc,9.48,rtol=1e-2)
-# --- 
+    rv, mc = read_summary(output=output)
+    assert np.isclose(rv, 937.06, rtol=1e-2)
+    assert np.isclose(mc, 9.48, rtol=1e-2)
+
+
+# ---
 def test_integration_single_market_b():
 
-
-    pathtoconfig =  str(
+    pathtoconfig = str(
         Path(str(files("opti_market"))).resolve().parents[1]
-        / "tests" / "configuration_folder_tests"
+        / "tests"
+        / "configuration_folder_tests"
         / "single_market_b.yml"
     )
 
@@ -106,14 +111,16 @@ def test_integration_single_market_b():
     markt = Markets(config_sim["markets"])
     # Solution options: {To Do: seeing the other options}
     opti_opt = Opti_Market_Options.read_optimisation_options(config_sim["sim_options"])
-    output = Output.read_output_configuration(dict_config=config_sim["output"]
-                                              , name_simulation=str(config_sim["name"]))
-    
-    
-    solve_problem(opti_opt=opti_opt, markt=markt, bat=bat,output=output)
+    output = Output.read_output_configuration(
+        dict_config=config_sim["output"], name_simulation=str(config_sim["name"])
+    )
+
+    solve_problem(opti_opt=opti_opt, markt=markt, bat=bat, output=output)
     # See if the total revenue and total cycles are the correct one
-    rv,mc = read_summary(output=output)
-    assert np.isclose(rv,1092.28,rtol=1e-2)
-    assert np.isclose(mc,9.59,rtol=1e-2)
+    rv, mc = read_summary(output=output)
+    assert np.isclose(rv, 1092.28, rtol=1e-2)
+    assert np.isclose(mc, 9.59, rtol=1e-2)
+
+
 # ---
-# --- 
+# ---
