@@ -54,7 +54,7 @@ class Markets:
         start :list[pd.Timestamp] = []
         end :list[pd.Timestamp] = []
         for k in range(self.n_market):
-            a = getattr(self,f'market_n{k}')
+            a = getattr(self,f'market_n{k+1}')
             start.append(a['timestamp'].min())
             end.append(a['timestamp'].max())
         
