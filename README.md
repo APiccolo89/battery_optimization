@@ -7,6 +7,11 @@ The problem that **opti_market** solves is to optimize the charge and discharge 
 >[!WARNING]
 > The package is designed to accept several models of degradation. However, the degradation introduces non-linearities. Since the package updates the battery state after each optimization window, the degradation models should be used with extra care regarding the window of optimization. For example, if the optimization is unconstrained, in principle the user can use the entire year as the optimization window. However, if the user wants to quantify the battery degradation, they should use a reasonable window. The basic deployment of the battery in this package always assumes a 1-day optimization window.
 
+>[!NOTE]
+> The linear degradation formulation can be linearised and introduced natively within the linear optimization packaged. However, I preferred to have only one formulation and not introduce cases/subcases. 
+
+
+
 
 >[!NOTE]
 >1. I am not accustomed to non-linearities, so the degradation of the battery is treated as a state updated every n days.
@@ -216,7 +221,7 @@ Fields marked as optional can be omitted: the default value is then used. A miss
 | Key | Required | Default | Description |
 |---|---|---|---|
 | `model_name` | yes | – | Name of the battery in `src/opti_market/data/battery_data_base.yaml`. The database contains only the battery of the task (`bt001`). |
-| `degradation_model` | no | `linear` | `linear` or `compound`. After each window, the storage capacity is updated from the number of cycles *n* and the degradation per cycle *a*: linear $E_{\max}(n) = E_{\max}^{0}(1 - a\,n)$, compound $E_{\max}(n) = E_{\max}^{0}(1 - a)^{n}$. |
+| `degradation_model` | no | `linear` | `linear`, `compound` and `none`. After each window, the storage capacity is updated from the number of cycles *n* and the degradation per cycle *a*: linear $E_{\max}(n) = E_{\max}^{0}(1 - a\,n)$, compound $E_{\max}(n) = E_{\max}^{0}(1 - a)^{n}$. None, instead is not applying any degradation model|
 | `initial_cycles` | no | 0 | Equivalent full cycles already done by the battery before the simulation. The initial capacity is degraded accordingly. |
 | `initial_age` | no | 0 | Age of the battery in years. Stored, but not used in the current version. |
 | `initial_charge` | no | 0.5 | Energy in the battery at the start of the simulation, as a fraction (0–1) of the capacity. |
