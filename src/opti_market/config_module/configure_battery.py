@@ -7,7 +7,7 @@ from typing import Literal
 import numpy as np
 import yaml
 
-DegradationModel = Literal["linear", "compound","none"]
+DegradationModel = Literal["linear", "compound", "none"]
 
 
 @dataclass(frozen=True)
@@ -64,6 +64,7 @@ class BATTERY:
         cumulative_power_discharged (float): cumulative discharged energy (MWh).
         degradation_model (str): "linear", "compound" or "none".
     """
+
     model_name: InitVar[str]
     battery_spec: BATTERY_SPEC = field(init=False)
     # Initial state of the battery

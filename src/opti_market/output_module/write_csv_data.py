@@ -197,11 +197,15 @@ def output_results_opti(
     revenue = save_data_raw(output, bat_cfg, markt, prob, time_information, summary)
     save_window(output, bat_cfg, markt, prob, time_information, revenue)
 
+
 def _rounded(value: Any, decimals: int = 2) -> Any:
     """Round floats; leave text, dates, integers and booleans unchanged."""
-    if isinstance(value, numbers.Number) and not isinstance(value, (bool, numbers.Integral)):
+    if isinstance(value, numbers.Number) and not isinstance(
+        value, (bool, numbers.Integral)
+    ):
         return round(float(value), decimals)
     return value
+
 
 # ---
 def summary_table(summary: dict[str, Any]) -> pd.DataFrame:
@@ -211,11 +215,11 @@ def summary_table(summary: dict[str, Any]) -> pd.DataFrame:
         unit = _SUMMARY_UNIT.get(key, "")
         if isinstance(value, dict):  # market_revenues -> one row per market
             for name, sub_value in value.items():
-                sub_value = _rounded(sub_value,2)
-                
+                sub_value = _rounded(sub_value, 2)
+
                 rows.append((f"{key}:{name}", sub_value, unit))
         else:
-            value = _rounded(value,2)
+            value = _rounded(value, 2)
             rows.append((key, value, unit))
     return pd.DataFrame(rows, columns=["metric", "value", "unit"])
 

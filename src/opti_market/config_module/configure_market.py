@@ -32,6 +32,7 @@ class Markets:
         dt_steps (list[int]): number of common time steps in one period of each
             market.
     """
+
     markets: InitVar[dict[str, Any]]
     n_market: int = field(init=False)
     market_n1: pd.DataFrame = field(init=False)
@@ -44,7 +45,6 @@ class Markets:
     common_end: pd.Timestamp = field(init=False)
     dt: float = 0.0
     dt_steps: list[int] = field(init=False)
-    
 
     # ---
     def __post_init__(self, markets: dict[str, Any]):
@@ -73,9 +73,9 @@ class Markets:
 
         self._extract_dt()
         self._check_initial_final_date_markets()
-        
+
     # Find the common time interval
-    def _check_initial_final_date_markets(self)->None:
+    def _check_initial_final_date_markets(self) -> None:
         """Find the common time frame of the markets.
 
         Set common_start to the latest first timestamp and common_end to the
@@ -84,19 +84,20 @@ class Markets:
         Raises:
             ValueError: if the markets do not overlap in time.
         """
-        
-        start :list[pd.Timestamp] = []
-        end :list[pd.Timestamp] = []
+
+        start: list[pd.Timestamp] = []
+        end: list[pd.Timestamp] = []
         for k in range(self.n_market):
-            a = getattr(self,f'market_n{k+1}')
-            start.append(a['timestamp'].min())
-            end.append(a['timestamp'].max())
-        
+            a = getattr(self, f"market_n{k + 1}")
+            start.append(a["timestamp"].min())
+            end.append(a["timestamp"].max())
+
         self.common_start = max(start)
         self.common_end = min(end)
-        
+
         if self.common_start >= self.common_end:
             raise ValueError("The markets do not overlap in time")
+
     # ---
     def _extract_dt(self) -> None:
         """Collect all the markets, compute the dt for each market and

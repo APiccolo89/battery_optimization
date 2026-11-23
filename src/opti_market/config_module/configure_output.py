@@ -19,6 +19,7 @@ class Output:
         clean_option (bool): if True, an existing results folder is removed
             before the run.
     """
+
     path_to_save: Path
     basic_plot: bool
     clean_option: bool

@@ -28,6 +28,7 @@ class MarketProblem(TypedDict):
         res (int): number of model time steps in one market period.
         prices (NDArray[np.float64]): market price in each period (£/MWh).
     """
+
     charge: VarDict
     discharge: VarDict
     res: int
@@ -91,8 +92,8 @@ def add_market(
 
 # ---
 def battery_confg(
-    prob: pulp.LpProblem, bat: BATTERY, time_vec_len: int,
-min_charge:float) -> dict[str, dict[int, pulp.LpVariable]]:
+    prob: pulp.LpProblem, bat: BATTERY, time_vec_len: int, min_charge: float
+) -> dict[str, dict[int, pulp.LpVariable]]:
     """Add the battery variables to the problem.
 
     Args:
@@ -167,8 +168,9 @@ def configure_problem(
     prob = pulp.LpProblem(name_problem, pulp.LpMaximize)
     t_vc = int((_MIN_DAY_ * opti_mar.window_day.days) / mar.dt)
     dt_hr = mar.dt / _MIN_HR_
-    bat_prb = battery_confg(prob=prob, bat=bat, time_vec_len=t_vc
-                            ,min_charge=opti_mar.charge_min)
+    bat_prb = battery_confg(
+        prob=prob, bat=bat, time_vec_len=t_vc, min_charge=opti_mar.charge_min
+    )
     time_step = range(t_vc)
     # Set the market variables
     for i in range(1, mar.n_market + 1):
@@ -205,7 +207,11 @@ def configure_problem(
     max_dch = bat.get_spec_battery("max_discharge_rate")
     max_cha = bat.get_spec_battery("max_charge_rate")
 
-    prob += total_energy_uncharged <= opti_mar.max_cycles * opti_mar.window_day.days * max_pow, "cycle_day_limit"
+    prob += (
+        total_energy_uncharged
+        <= opti_mar.max_cycles * opti_mar.window_day.days * max_pow,
+        "cycle_day_limit",
+    )
     if opti_interval == 0:
         prob += (
             bat_prb["energy_bat"][0] == bat.initial_charge * max_pow,
@@ -302,8 +308,8 @@ def solve_problem(
         )
         final_energy = energy[-1]  # state at the end -> next window
         steps = np.diff(energy)
-        discharged = -steps[steps < 0].sum()  
-        bat.update_state_battery(dE=-discharged)  
+        discharged = -steps[steps < 0].sum()
+        bat.update_state_battery(dE=-discharged)
         start_energy = min(max(final_energy, 0.0), bat.effective_max_storage_vol)
         total_profit = total_profit + float(pulp.value(prob.objective))
         start = start + opti_opt.window_day

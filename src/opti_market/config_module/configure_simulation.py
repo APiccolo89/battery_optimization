@@ -20,6 +20,7 @@ class Opti_Market_Options:
         charge_min (float): minimum stored energy, as a fraction of the
             effective maximum storage volume.
     """
+
     window_day: pd.Timedelta
     start_date: pd.Timestamp
     end_date: pd.Timestamp
