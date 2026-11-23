@@ -278,3 +278,5 @@ simulation:
     default_location: True
     clean_option: True
 ```
+> [!NOTE]
+> I removed the basic plot option. I believe that the graphical representation of the output should be outside the optimisation package.
