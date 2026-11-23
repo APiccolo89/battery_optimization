@@ -1,3 +1,5 @@
+"""Output settings: results folder and output options."""
+
 from dataclasses import dataclass
 from importlib.resources import files
 from pathlib import Path
@@ -8,6 +10,15 @@ from typing import Any
 # ---
 @dataclass(frozen=True)
 class Output:
+    """Output settings of the simulation.
+
+    Attributes:
+        path_to_save (Path): folder where the results are written.
+        basic_plot (bool): plot flag read from the configuration; not used
+            elsewhere in the package.
+        clean_option (bool): if True, an existing results folder is removed
+            before the run.
+    """
     path_to_save: Path
     basic_plot: bool
     clean_option: bool

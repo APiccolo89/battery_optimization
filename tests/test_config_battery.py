@@ -2,7 +2,6 @@ import importlib.resources
 from pathlib import Path
 
 import numpy as np
-
 from opti_market.config_module import BATTERY, read_configuration
 
 
@@ -13,6 +12,7 @@ def test_specification_battery(mname: str = "bt001"):
     assert np.isclose(bat.get_spec_battery("max_discharge_rate"), 2.0, rtol=1e-2)
     assert np.isclose(bat.get_spec_battery("max_charge_rate"), 2.0, rtol=1e-2)
     assert np.isclose(bat.get_spec_battery("capex"), 500000, rtol=1e-2)
+
 
 # ---
 def test_configure_battery():
@@ -36,6 +36,8 @@ def test_configure_battery():
         passed = False
 
     assert passed
+
+
 # ---
 def test_used_battery_cumulative_discharge():
     """Test the analytical formulation for the total discharge."""

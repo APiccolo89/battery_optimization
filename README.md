@@ -24,6 +24,8 @@ The problem that **opti_market** solves is to optimize the charge and discharge 
 opti_market
 ├── base_configuration
 │   ├── blue_print.yml
+│   ├── double_market_min_charge.yml 
+│   ├── double_market_unconstrained.yml #
 │   ├── double_market.yml
 │   ├── single_market_a.yml
 │   └── single_market_b.yml

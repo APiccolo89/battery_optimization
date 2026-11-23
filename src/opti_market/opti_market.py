@@ -1,3 +1,5 @@
+"""Command-line entry point of the opti_market package."""
+
 import argparse
 import shutil
 from pathlib import Path
@@ -10,6 +12,19 @@ from opti_market.optimisation_module import solve_problem
 
 # function to run the function
 def run_opti_market(args: list[str] | None = None):
+    """Run the battery dispatch optimisation from the command line.
+
+    Parse the arguments, read the configuration file, prepare the output
+    folder and solve the optimisation problem.
+
+    Args:
+        args (list[str] | None): command-line arguments; if None, sys.argv
+            is used.
+
+    Raises:
+        ValueError: if the configuration file does not exist, or if the
+            output folder already exists and clean_option is False.
+    """
     # Parse the arguments
     parser = argparse.ArgumentParser(
         prog="python -m opti_market",

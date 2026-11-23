@@ -1,3 +1,5 @@
+"""Writing of the results (raw data, window totals, summary) to CSV files."""
+
 from __future__ import annotations
 
 import numbers
@@ -41,6 +43,14 @@ DATA_WINDOW_ = ("start", "end", "total_revenue_gbp", "energy_end_mwh", "discharg
 # ---
 # ---
 def create_path(path: Path) -> Path:
+    """Create the folder if it does not exist and return it.
+
+    Args:
+        path (Path): folder to create.
+
+    Returns:
+        Path: the same path.
+    """
     path.mkdir(parents=True, exist_ok=True)
 
     return path
@@ -55,6 +65,24 @@ def save_data_raw(
     time_information: tuple[pd.Timestamp, float, pd.Timedelta],
     summary: dict[str, Any],
 ) -> list[float]:
+    """Append the results of one window to one CSV file per market.
+
+    Each row holds the timestamp, the price (£/MWh), the charge and discharge
+    power (MW) and the revenue (£) of one market period. The revenue of each
+    market is also added to summary["market_revenues"].
+
+    Args:
+        output (Output): output settings.
+        bat_cfg (dict): battery variables (not used).
+        markt (dict): variables and data of each market.
+        prob (pulp.LpProblem): solved problem (not used).
+        time_information (tuple): start of the window, model time step
+            (minutes) and window length.
+        summary (dict): run summary, updated in place.
+
+    Returns:
+        list[float]: total revenue of each market in the window (£).
+    """
     path = create_path(Path(output.path_to_save / "Data_Raw"))
     # save markets data
     dt_min = time_information[1]  # model step, minutes
@@ -102,6 +130,21 @@ def save_window(
     time_information: tuple[pd.Timestamp, float, pd.Timedelta],
     total_revenue: list[float],
 ) -> None:
+    """Append the totals of one window to window_optimisation_results.csv.
+
+    The row holds the start and end of the window, the total revenue (£),
+    the stored energy at the end (MWh) and the energy discharged from the
+    battery (MWh), computed from the decreases of the stored energy.
+
+    Args:
+        output (Output): output settings.
+        bat_prb (dict): battery variables.
+        markt (dict): variables and data of each market (not used).
+        prob (pulp.LpProblem): solved problem (not used).
+        time_information (tuple): start of the window, model time step
+            (minutes) and window length.
+        total_revenue (list[float]): revenue of each market in the window (£).
+    """
 
     path = create_path(Path(output.path_to_save / "Data_Window"))
     start = time_information[0]
@@ -139,6 +182,17 @@ def output_results_opti(
     time_information: tuple[pd.Timestamp, float, pd.Timedelta],
     summary: dict[str, Any],
 ) -> None:
+    """Save the raw data and the window totals of one optimisation window.
+
+    Args:
+        output (Output): output settings.
+        bat_cfg (dict): battery variables.
+        markt (dict): variables and data of each market.
+        prob (pulp.LpProblem): solved problem.
+        time_information (tuple): start of the window, model time step
+            (minutes) and window length.
+        summary (dict): run summary, updated in place.
+    """
 
     revenue = save_data_raw(output, bat_cfg, markt, prob, time_information, summary)
     save_window(output, bat_cfg, markt, prob, time_information, revenue)

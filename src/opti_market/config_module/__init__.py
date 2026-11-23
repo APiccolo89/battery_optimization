@@ -1,3 +1,5 @@
+"""Configuration of the battery, markets, simulation options and output."""
+
 from .configuration_read import read_configuration, read_configurations_files
 from .configure_battery import BATTERY, BATTERY_SPEC
 from .configure_market import Markets, read_market
